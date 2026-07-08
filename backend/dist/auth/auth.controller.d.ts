@@ -11,11 +11,11 @@ export declare class AuthController {
     login(dto: LoginDto): Promise<import("./auth.service").AuthResponse>;
     me(user: AuthUser): Promise<{
         id: string;
-        email: string;
         nombre: string;
-        carrera: string | null;
-        universidad: string | null;
         createdAt: Date;
         updatedAt: Date;
+        email: string;
+        carrera: string | null;
+        universidad: string | null;
     } | null>;
 }
