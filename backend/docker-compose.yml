@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: promapp_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: promapp
+      POSTGRES_PASSWORD: promapp
+      POSTGRES_DB: promapp
+    ports:
+      - '5432:5432'
+    volumes:
+      - promapp_pgdata:/var/lib/postgresql/data
+
+volumes:
+  promapp_pgdata:
