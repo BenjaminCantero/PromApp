@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/asignaturas/presentation/asignatura_config_screen.dart';
 import '../../features/asignaturas/presentation/asignatura_detalle_screen.dart';
 import '../../features/asignaturas/presentation/asignaturas_screen.dart';
+import '../../features/auth/presentation/perfil_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/herramientas/presentation/herramientas_screen.dart';
 import '../../shared/widgets/app_shell.dart';
@@ -16,6 +17,7 @@ abstract class AppRoutes {
 
   // Full-screen (sobre el shell)
   static const asignaturaNueva = '/asignatura/nueva';
+  static const perfil = '/perfil';
   static String asignaturaDetalle(String id) => '/asignatura/$id';
   static String asignaturaEditar(String id) => '/asignatura/$id/editar';
 }
@@ -67,6 +69,11 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.asignaturaNueva,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const AsignaturaConfigScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.perfil,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const PerfilScreen(),
     ),
     GoRoute(
       path: '/asignatura/:id',

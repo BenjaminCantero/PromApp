@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/error_retry.dart';
 import '../../calculos/domain/calculo_service.dart';
 import '../../calculos/domain/estado_nota.dart';
 import '../../dashboard/presentation/widgets/promedio_donut.dart';
@@ -43,7 +44,11 @@ class _AsignaturaDetalleScreenState
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => ErrorRetry(
+          error: e,
+          onRetry: () =>
+              ref.invalidate(asignaturaProvider(widget.asignaturaId)),
+        ),
         data: (a) {
           if (a == null) {
             return const Center(child: Text('Asignatura no encontrada'));

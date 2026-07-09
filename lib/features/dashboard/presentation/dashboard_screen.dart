@@ -7,6 +7,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/error_retry.dart';
+import '../../auth/application/auth_controller.dart';
 import '../application/dashboard_provider.dart';
 import '../domain/dashboard_data.dart';
 import 'widgets/promedio_donut.dart';
@@ -27,24 +29,39 @@ class DashboardScreen extends ConsumerWidget {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (data) => _DashboardBody(data: data),
+        error: (e, _) => ErrorRetry(
+          error: e,
+          onRetry: () => ref.invalidate(dashboardProvider),
+        ),
+        data: (data) => _DashboardBody(
+          data: data,
+          nombre: _nombreUsuario(ref),
+        ),
       ),
     );
+  }
+
+  /// Primer nombre del usuario autenticado (para el saludo del hero).
+  String _nombreUsuario(WidgetRef ref) {
+    final user = ref.watch(authControllerProvider).value;
+    final nombre = user?.nombre.trim() ?? '';
+    if (nombre.isEmpty) return 'Bienvenido';
+    return nombre.split(' ').first;
   }
 }
 
 class _DashboardBody extends StatelessWidget {
-  const _DashboardBody({required this.data});
+  const _DashboardBody({required this.data, required this.nombre});
 
   final DashboardData data;
+  final String nombre;
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
         // AppBar con hero gradient
-        _HeroSliverAppBar(data: data),
+        _HeroSliverAppBar(data: data, nombre: nombre),
 
         // Contenido principal
         SliverPadding(
@@ -71,8 +88,12 @@ class _DashboardBody extends StatelessWidget {
 
 // --- Hero SliverAppBar con gradiente y donut centrado ---
 class _HeroSliverAppBar extends StatelessWidget {
-  const _HeroSliverAppBar({required this.data});
+  const _HeroSliverAppBar({required this.data, required this.nombre});
   final DashboardData data;
+  final String nombre;
+
+  String _iniciales(String n) =>
+      n.trim().isEmpty ? '?' : n.trim()[0].toUpperCase();
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +161,7 @@ class _HeroSliverAppBar extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bienvenido 👋',
+                            'Hola, $nombre 👋',
                             style: AppTypography.caption.copyWith(
                               color: AppColors.primaryLight,
                               letterSpacing: 0.5,
@@ -155,19 +176,26 @@ class _HeroSliverAppBar extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Avatar
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          shape: BoxShape.circle,
-                          boxShadow: AppColors.primaryGlow,
-                        ),
-                        child: const Icon(
-                          Icons.person_rounded,
-                          color: AppColors.textOnDark,
-                          size: 22,
+                      // Avatar → abre Perfil
+                      GestureDetector(
+                        key: const Key('perfil-avatar'),
+                        onTap: () => context.push(AppRoutes.perfil),
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            shape: BoxShape.circle,
+                            boxShadow: AppColors.primaryGlow,
+                          ),
+                          child: Center(
+                            child: Text(
+                              _iniciales(nombre),
+                              style: AppTypography.bodyBold.copyWith(
+                                color: AppColors.textOnDark,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],

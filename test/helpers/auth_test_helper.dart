@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:promapp/features/asignaturas/application/asignatura_providers.dart';
 import 'package:promapp/features/asignaturas/data/mock_asignatura_repository.dart';
 import 'package:promapp/features/auth/application/auth_controller.dart';
@@ -12,6 +13,10 @@ class _FakeAuthController extends AuthController {
         email: 'test@promapp.cl',
         nombre: 'Test',
       );
+
+  // Evita tocar red / almacenamiento seguro en pruebas.
+  @override
+  Future<void> logout() async => state = const AsyncData(null);
 }
 
 /// Overrides para montar `PromApp` en pruebas:

@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/error_retry.dart';
 import '../../calculos/domain/calculo_service.dart';
 import '../../calculos/domain/estado_nota.dart';
 import '../application/asignatura_providers.dart';
@@ -27,7 +28,10 @@ class AsignaturasScreen extends ConsumerWidget {
         loading: () => const Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => ErrorRetry(
+          error: e,
+          onRetry: () => ref.invalidate(asignaturasProvider),
+        ),
         data: (asignaturas) {
           return CustomScrollView(
             slivers: [
