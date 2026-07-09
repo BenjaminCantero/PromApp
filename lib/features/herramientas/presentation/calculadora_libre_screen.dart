@@ -22,6 +22,11 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
   late AnimationController _resultAnim;
   late Animation<double> _resultScale;
 
+  // ── Sección examen ──
+  bool _conExamen = false;
+  final _notaExamenCtrl = TextEditingController();
+  final _pctExamenCtrl  = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +35,6 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
       duration: const Duration(milliseconds: 400),
     );
     _resultScale = CurvedAnimation(parent: _resultAnim, curve: Curves.elasticOut);
-    // Iniciar con 3 filas vacías
     for (int i = 0; i < 3; i++) {
       _filas.add(_FilaNota());
     }
@@ -39,6 +43,8 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
   @override
   void dispose() {
     _resultAnim.dispose();
+    _notaExamenCtrl.dispose();
+    _pctExamenCtrl.dispose();
     for (final f in _filas) {
       f.dispose();
     }
@@ -57,13 +63,24 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
     if (sumaPct <= 0) return const _Resultado.vacia();
 
     final sumaPond = validas.fold<double>(0, (acc, f) => acc + f.nota! * f.pct!);
-    final promedio = sumaPond / sumaPct;
+    final promedioPres = sumaPond / sumaPct;
     final pctUsado = _filas.fold<double>(0, (acc, f) => acc + (f.pct ?? 0));
 
+    // ── Cálculo con examen ──
+    final notaEx  = double.tryParse(_notaExamenCtrl.text.replaceAll(',', '.'));
+    final pctEx   = double.tryParse(_pctExamenCtrl.text.replaceAll(',', '.'));
+    double? notaFinal;
+    if (_conExamen && notaEx != null && pctEx != null && pctEx > 0 && pctEx < 100) {
+      final pesoEx  = pctEx / 100.0;
+      final pesoPresEfectivo = 1.0 - pesoEx;
+      notaFinal = promedioPres * pesoPresEfectivo + notaEx * pesoEx;
+    }
+
     return _Resultado(
-      promedio: promedio,
+      promedioPresentacion: promedioPres,
       pctUsado: pctUsado.clamp(0, 100),
       cantNotas: validas.length,
+      notaFinal: notaFinal,
     );
   }
 
@@ -86,8 +103,11 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
     for (final f in _filas) {
       f.dispose();
     }
+    _notaExamenCtrl.clear();
+    _pctExamenCtrl.clear();
     setState(() {
       _filas.clear();
+      _conExamen = false;
       for (int i = 0; i < 3; i++) {
         _filas.add(_FilaNota());
       }
@@ -333,24 +353,29 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                     borderColor: AppColors.reprobado.withValues(alpha: 0.4),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.warning_amber_rounded,
-                          color: AppColors.reprobado,
-                          size: 18,
-                        ),
+                        const Icon(Icons.warning_amber_rounded, color: AppColors.reprobado, size: 18),
                         const SizedBox(width: AppDimensions.sm),
                         Expanded(
                           child: Text(
-                            'La suma de ponderaciones supera el 100%. El promedio puede no ser representativo.',
-                            style: AppTypography.caption.copyWith(
-                              color: AppColors.reprobado,
-                            ),
+                            'La suma de ponderaciones supera el 100%.',
+                            style: AppTypography.caption.copyWith(color: AppColors.reprobado),
                           ),
                         ),
                       ],
                     ),
                   ),
                 ],
+
+                // --- Sección examen ---
+                const SizedBox(height: AppDimensions.xl),
+                _SeccionExamen(
+                  activo: _conExamen,
+                  notaCtrl: _notaExamenCtrl,
+                  pctCtrl: _pctExamenCtrl,
+                  onToggle: (v) { setState(() => _conExamen = v); _resultAnim.forward(from: 0); },
+                  onChanged: _onChanged,
+                  resultado: resultado,
+                ),
               ]),
             ),
           ),
@@ -387,33 +412,43 @@ class _FilaNota {
 
 class _Resultado {
   const _Resultado({
-    required this.promedio,
+    required this.promedioPresentacion,
     required this.pctUsado,
     required this.cantNotas,
+    this.notaFinal,
   }) : vacia = false;
 
   const _Resultado.vacia()
-      : promedio = 0,
+      : promedioPresentacion = 0,
         pctUsado = 0,
         cantNotas = 0,
+        notaFinal = null,
         vacia = true;
 
   final bool vacia;
-  final double promedio;
+  final double promedioPresentacion;
   final double pctUsado;
   final int cantNotas;
+  final double? notaFinal;
+
+  /// Nota a mostrar en el donut (final si hay examen, presentación si no)
+  double get promedio => notaFinal ?? promedioPresentacion;
 
   bool get aprobado => promedio >= 4.0;
+  bool get tieneExamen => notaFinal != null;
 
-  Color get color {
-    if (vacia) return AppColors.textMuted;
-    if (promedio >= 5.5) return AppColors.aprobado;
-    if (promedio >= 4.0) return const Color(0xFF34D399); // emerald claro
-    if (promedio >= 3.5) return AppColors.examen;
+  Color _colorPara(double n) {
+    if (n >= 5.5) return AppColors.aprobado;
+    if (n >= 4.0) return const Color(0xFF34D399);
+    if (n >= 3.5) return AppColors.examen;
     return AppColors.reprobado;
   }
 
+  Color get color => vacia ? AppColors.textMuted : _colorPara(promedio);
+  Color get colorPres => vacia ? AppColors.textMuted : _colorPara(promedioPresentacion);
+
   String get texto => vacia ? '—' : promedio.toStringAsFixed(1);
+  String get textoPres => vacia ? '—' : promedioPresentacion.toStringAsFixed(1);
 
   String get etiqueta {
     if (vacia) return 'sin datos';
@@ -423,8 +458,7 @@ class _Resultado {
     return 'Reprobado';
   }
 
-  double get progreso =>
-      vacia ? 0 : (promedio / 7.0).clamp(0.0, 1.0);
+  double get progreso => vacia ? 0 : (promedio / 7.0).clamp(0.0, 1.0);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -485,6 +519,21 @@ class _ResultadoCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (resultado.tieneExamen) ...[
+                    const SizedBox(height: AppDimensions.sm),
+                    Row(
+                      children: [
+                        Text('Presentación: ', style: AppTypography.caption),
+                        Text(
+                          resultado.textoPres,
+                          style: AppTypography.caption.copyWith(
+                            color: resultado.colorPres,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ],
             ),
@@ -678,6 +727,223 @@ class _CampoNota extends StatelessWidget {
         filled: true,
         fillColor: AppColors.surfaceAlt,
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Widget: Sección de examen final
+// ─────────────────────────────────────────────────────────────
+
+class _SeccionExamen extends StatelessWidget {
+  const _SeccionExamen({
+    required this.activo,
+    required this.notaCtrl,
+    required this.pctCtrl,
+    required this.onToggle,
+    required this.onChanged,
+    required this.resultado,
+  });
+
+  final bool activo;
+  final TextEditingController notaCtrl;
+  final TextEditingController pctCtrl;
+  final ValueChanged<bool> onToggle;
+  final ValueChanged<String> onChanged;
+  final _Resultado resultado;
+
+  @override
+  Widget build(BuildContext context) {
+    final notaEx = double.tryParse(notaCtrl.text.replaceAll(',', '.'));
+    final pctEx  = double.tryParse(pctCtrl.text.replaceAll(',', '.'));
+    final listo  = activo && notaEx != null && pctEx != null && pctEx > 0 && pctEx < 100;
+
+    return AppCard(
+      padding: const EdgeInsets.all(AppDimensions.lg),
+      borderColor: activo
+          ? AppColors.examen.withValues(alpha: 0.4)
+          : AppColors.border,
+      glowColor: listo ? AppColors.examen : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Cabecera con toggle ──
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppDimensions.xs + 2),
+                decoration: BoxDecoration(
+                  color: AppColors.examen.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusSm - 2),
+                ),
+                child: const Icon(
+                  Icons.school_rounded,
+                  size: 14,
+                  color: AppColors.examen,
+                ),
+              ),
+              const SizedBox(width: AppDimensions.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Examen Final', style: AppTypography.h3),
+                    Text(
+                      'Pondera tu nota de presentación con el examen',
+                      style: AppTypography.caption,
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: activo,
+                onChanged: onToggle,
+                activeThumbColor: AppColors.examen,
+                trackColor: WidgetStateProperty.resolveWith((s) {
+                  if (s.contains(WidgetState.selected)) {
+                    return AppColors.examen.withValues(alpha: 0.3);
+                  }
+                  return AppColors.border;
+                }),
+              ),
+            ],
+          ),
+
+          // ── Campos (solo cuando activo) ──
+          AnimatedSize(
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutCubic,
+            child: activo
+                ? Padding(
+                    padding: const EdgeInsets.only(top: AppDimensions.lg),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Nota examen', style: AppTypography.label),
+                                  const SizedBox(height: 6),
+                                  _CampoNota(
+                                    controller: notaCtrl,
+                                    hint: '1.0 – 7.0',
+                                    onChanged: onChanged,
+                                    isValid: notaEx != null,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: AppDimensions.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Ponderación examen', style: AppTypography.label),
+                                  const SizedBox(height: 6),
+                                  _CampoNota(
+                                    controller: pctCtrl,
+                                    hint: 'Ej: 40',
+                                    suffix: '%',
+                                    onChanged: onChanged,
+                                    isValid: pctEx != null,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // ── Resultado final si hay datos suficientes ──
+                        if (listo && !resultado.vacia) ...[
+                          const SizedBox(height: AppDimensions.lg),
+                          Container(
+                            padding: const EdgeInsets.all(AppDimensions.md),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceAlt,
+                              borderRadius:
+                                  BorderRadius.circular(AppDimensions.radiusMd),
+                              border: Border.all(
+                                  color: AppColors.borderLight),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _ResumenNota(
+                                  label: 'Presentación',
+                                  valor: resultado.textoPres,
+                                  pct: '${(100 - pctEx).toStringAsFixed(0)}%',
+                                  color: resultado.colorPres,
+                                ),
+                                const Icon(
+                                  Icons.add_rounded,
+                                  color: AppColors.textMuted,
+                                  size: 18,
+                                ),
+                                _ResumenNota(
+                                  label: 'Examen',
+                                  valor: notaEx.toStringAsFixed(1),
+                                  pct: '${pctEx.toStringAsFixed(0)}%',
+                                  color: AppColors.examen,
+                                ),
+                                const Icon(
+                                  Icons.drag_handle_rounded,
+                                  color: AppColors.textMuted,
+                                  size: 18,
+                                ),
+                                _ResumenNota(
+                                  label: 'Nota Final',
+                                  valor: resultado.texto,
+                                  pct: '',
+                                  color: resultado.color,
+                                  grande: true,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResumenNota extends StatelessWidget {
+  const _ResumenNota({
+    required this.label,
+    required this.valor,
+    required this.pct,
+    required this.color,
+    this.grande = false,
+  });
+  final String label;
+  final String valor;
+  final String pct;
+  final Color color;
+  final bool grande;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: AppTypography.caption),
+        const SizedBox(height: 2),
+        Text(
+          valor,
+          style: (grande ? AppTypography.h1 : AppTypography.h2)
+              .copyWith(color: color),
+        ),
+        if (pct.isNotEmpty)
+          Text(pct, style: AppTypography.caption.copyWith(
+            color: AppColors.textMuted,
+          )),
+      ],
     );
   }
 }
