@@ -2,20 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:promapp/app.dart';
-import 'package:promapp/core/router/app_router.dart';
 
 import 'helpers/auth_test_helper.dart';
 
 void main() {
-  setUp(() => appRouter.go(AppRoutes.dashboard));
-
+  /// Abre la tab "Calcular" y deja visibles los campos de entrada.
+  ///
+  /// En la pantalla, las tarjetas de resultado van ARRIBA y los campos de
+  /// "Parámetros de Evaluación" más abajo (SliverList lazy) → hay que bajar.
   Future<void> abrirSimulador(WidgetTester tester) async {
-    await tester.pumpWidget(ProviderScope(overrides: loggedInOverrides, child: const PromApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: loggedInOverrides, child: const PromApp()),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Calcular'));
     await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Parámetros de Evaluación'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Parámetros de Evaluación'), findsOneWidget);
   }
+
+  /// Sube hasta que la tarjeta de resultado sea visible.
+  Future<void> subirHasta(WidgetTester tester, Finder objetivo) =>
+      tester.scrollUntilVisible(
+        objetivo,
+        -250,
+        scrollable: find.byType(Scrollable).first,
+      );
 
   testWidgets('El simulador calcula la nota mínima de examen en vivo',
       (tester) async {
@@ -27,12 +44,7 @@ void main() {
     await tester.enterText(find.byType(TextField).at(1), '40');
     await tester.pumpAndSettle();
 
-    // Las tarjetas de resultado están más abajo (ListView lazy) → scroll.
-    await tester.scrollUntilVisible(
-      find.text('Necesitas rendir'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await subirHasta(tester, find.text('Necesitas rendir'));
     expect(find.text('Necesitas rendir'), findsOneWidget);
     expect(find.text('2.5'), findsWidgets);
   });
@@ -46,11 +58,7 @@ void main() {
     await tester.enterText(find.byType(TextField).at(2), '5.5'); // eximir
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.text('¡Estás eximido!'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await subirHasta(tester, find.text('¡Estás eximido!'));
     expect(find.text('¡Estás eximido!'), findsOneWidget);
   });
 }

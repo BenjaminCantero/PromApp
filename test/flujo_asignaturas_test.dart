@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:promapp/app.dart';
-import 'package:promapp/core/router/app_router.dart';
 
 import 'helpers/auth_test_helper.dart';
 
 void main() {
-  // El router es global: lo devolvemos al inicio entre tests para aislarlos.
-  setUp(() => appRouter.go(AppRoutes.dashboard));
 
   testWidgets('Navega a la lista y abre el detalle de una asignatura',
       (tester) async {

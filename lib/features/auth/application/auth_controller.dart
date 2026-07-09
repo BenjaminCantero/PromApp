@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/error_messages.dart';
 import '../../../core/storage/token_storage.dart';
 import '../data/auth_repository.dart';
 import '../domain/auth_user.dart';
@@ -64,21 +65,7 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     } on AuthException {
       rethrow;
     } on DioException catch (e) {
-      throw AuthException(_mensajeRed(e));
-    }
-  }
-
-  String _mensajeRed(DioException e) {
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.receiveTimeout:
-      case DioExceptionType.sendTimeout:
-        return 'El servidor tardó demasiado en responder';
-      case DioExceptionType.connectionError:
-      case DioExceptionType.unknown:
-        return 'No se pudo conectar con el servidor. ¿Está encendida la API?';
-      default:
-        return 'Error de conexión';
+      throw AuthException(mensajeDeRed(e));
     }
   }
 }

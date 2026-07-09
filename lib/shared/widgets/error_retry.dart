@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/network/error_messages.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimensions.dart';
 import '../../core/theme/app_typography.dart';
@@ -42,7 +43,7 @@ class ErrorRetry extends StatelessWidget {
             ),
             const SizedBox(height: AppDimensions.sm),
             Text(
-              _mensaje(error),
+              mensajeDeError(error),
               style: AppTypography.bodySecondary,
               textAlign: TextAlign.center,
             ),
@@ -56,13 +57,5 @@ class ErrorRetry extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _mensaje(Object? error) {
-    if (error == null) return 'Revisa tu conexión e inténtalo de nuevo.';
-    final texto = error.toString();
-    // Los repositorios lanzan excepciones con mensaje legible (ApiException).
-    if (texto.length < 120) return texto;
-    return 'Revisa tu conexión e inténtalo de nuevo.';
   }
 }

@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const throttler_1 = require("@nestjs/throttler");
 const users_service_1 = require("../users/users.service");
 const auth_service_1 = require("./auth.service");
 const current_user_decorator_1 = require("./decorators/current-user.decorator");
@@ -44,6 +45,7 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 __decorate([
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 5 } }),
     (0, common_1.Post)('register'),
     (0, swagger_1.ApiOperation)({ summary: 'Crear cuenta y obtener token' }),
     __param(0, (0, common_1.Body)()),
@@ -52,6 +54,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "register", null);
 __decorate([
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 5 } }),
     (0, common_1.Post)('login'),
     (0, common_1.HttpCode)(200),
     (0, swagger_1.ApiOperation)({ summary: 'Iniciar sesión y obtener token' }),

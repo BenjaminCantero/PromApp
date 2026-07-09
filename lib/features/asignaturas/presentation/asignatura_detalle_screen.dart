@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/network/error_messages.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 import '../../../shared/widgets/error_retry.dart';
 import '../../calculos/domain/calculo_service.dart';
 import '../../calculos/domain/estado_nota.dart';
@@ -70,18 +72,33 @@ class _AsignaturaDetalleScreenState
     final res = await showNotaDialog(context,
         titulo: e.nombre, notaActual: e.nota);
     if (res == null) return;
-    await ref
-        .read(asignaturasControllerProvider.notifier)
-        .setNotaEvaluacion(a, e.id, res.nota);
+    await _guardarNota(
+      () => ref
+          .read(asignaturasControllerProvider.notifier)
+          .setNotaEvaluacion(a, e.id, res.nota),
+    );
   }
 
   Future<void> _editarExamen(Asignatura a) async {
     final res = await showNotaDialog(context,
         titulo: 'Nota del Examen', notaActual: a.notaExamen);
     if (res == null) return;
-    await ref
-        .read(asignaturasControllerProvider.notifier)
-        .setNotaExamen(a, res.nota);
+    await _guardarNota(
+      () => ref
+          .read(asignaturasControllerProvider.notifier)
+          .setNotaExamen(a, res.nota),
+    );
+  }
+
+  /// Guarda una nota avisando al usuario si la API falla (antes fallaba
+  /// en silencio y parecía que la nota había quedado registrada).
+  Future<void> _guardarNota(Future<void> Function() accion) async {
+    try {
+      await accion();
+      if (mounted) mostrarExito(context, 'Nota guardada');
+    } catch (e) {
+      if (mounted) mostrarError(context, mensajeDeError(e));
+    }
   }
 }
 

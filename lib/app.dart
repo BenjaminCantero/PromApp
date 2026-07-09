@@ -25,16 +25,21 @@ class PromApp extends ConsumerWidget {
       data: (user) => user == null
           ? _appBase(home: const AuthScreen())
           : MaterialApp.router(
+              // Clave distinta a la del `_appBase`: `MaterialApp` y
+              // `MaterialApp.router` son el MISMO tipo de widget, así que sin
+              // esto Flutter actualizaría el elemento en vez de reemplazarlo.
+              key: const ValueKey('app-router'),
               title: AppConstants.appName,
               debugShowCheckedModeBanner: false,
               theme: AppTheme.light,
-              routerConfig: appRouter,
+              routerConfig: ref.watch(goRouterProvider),
             ),
     );
   }
 
   /// MaterialApp sin router (para login / splash).
   Widget _appBase({required Widget home}) => MaterialApp(
+        key: const ValueKey('app-sin-sesion'),
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:promapp/app.dart';
-import 'package:promapp/core/router/app_router.dart';
 
 import 'helpers/auth_test_helper.dart';
 
 void main() {
-  setUp(() => appRouter.go(AppRoutes.dashboard));
 
   testWidgets('Abre Perfil desde el avatar y cierra sesión → vuelve al login',
       (tester) async {

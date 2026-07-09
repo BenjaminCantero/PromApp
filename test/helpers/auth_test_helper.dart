@@ -19,10 +19,16 @@ class _FakeAuthController extends AuthController {
   Future<void> logout() async => state = const AsyncData(null);
 }
 
-/// Overrides para montar `PromApp` en pruebas:
-/// - sesión ya iniciada (salta el login),
-/// - repositorio en memoria (mock), no la API real.
-final loggedInOverrides = [
-  authControllerProvider.overrideWith(_FakeAuthController.new),
-  asignaturaRepositoryProvider.overrideWith((ref) => MockAsignaturaRepository()),
-];
+/// Sesión ya iniciada: salta el login sin tocar red.
+final sesionIniciadaOverride =
+    authControllerProvider.overrideWith(_FakeAuthController.new);
+
+/// Repositorio en memoria (mock) en vez de la API real.
+final mockRepoOverride =
+    asignaturaRepositoryProvider.overrideWith((ref) => MockAsignaturaRepository());
+
+/// Overrides habituales para montar `PromApp` en pruebas de UI.
+///
+/// Si un test necesita otro repositorio (p. ej. uno que falla), usa
+/// `[sesionIniciadaOverride, tuRepoOverride]` en vez de esta lista.
+final loggedInOverrides = [sesionIniciadaOverride, mockRepoOverride];

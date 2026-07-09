@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/network/error_messages.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_snackbar.dart';
 import '../../calculos/domain/validators.dart';
 import '../application/asignatura_providers.dart';
 import '../application/asignaturas_controller.dart';
@@ -72,6 +74,7 @@ class _AsignaturaConfigScreenState
   bool _tieneExamen = false;
   double _pesoPresentacion = AppConstants.defaultPesoPresentacion;
   bool _inicializado = false;
+  bool _guardando = false;
 
   static const _tipos = [
     'Solemne', 'Control', 'Prueba', 'Tarea',
@@ -165,32 +168,24 @@ class _AsignaturaConfigScreenState
       notaEximir: _tieneExamen ? eximir : null,
     );
 
-    await ref
-        .read(asignaturasControllerProvider.notifier)
-        .guardar(asignatura);
-    if (mounted) Navigator.of(context).pop();
+    setState(() => _guardando = true);
+    try {
+      await ref
+          .read(asignaturasControllerProvider.notifier)
+          .guardar(asignatura);
+      if (!mounted) return;
+      mostrarExito(context, 'Ramo guardado');
+      Navigator.of(context).pop();
+    } catch (e) {
+      // La API falló: NO cerramos la pantalla — los datos del formulario
+      // siguen ahí para que el usuario reintente sin perder lo escrito.
+      if (mounted) _error(mensajeDeError(e));
+    } finally {
+      if (mounted) setState(() => _guardando = false);
+    }
   }
 
-  void _error(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline_rounded,
-                color: AppColors.textOnDark, size: 18),
-            const SizedBox(width: 8),
-            Text(msg),
-          ],
-        ),
-        backgroundColor: AppColors.reprobado,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        ),
-        margin: const EdgeInsets.all(AppDimensions.screenPadding),
-      ),
-    );
-  }
+  void _error(String msg) => mostrarError(context, msg);
 
   @override
   Widget build(BuildContext context) {
@@ -482,25 +477,37 @@ class _AsignaturaConfigScreenState
                 ),
                 const SizedBox(height: AppDimensions.xl),
 
-                // Botón guardar con gradiente
+                // Botón guardar con gradiente (bloqueado mientras guarda)
                 GestureDetector(
-                  onTap: _guardar,
-                  child: Container(
-                    height: AppDimensions.buttonHeight,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusMd),
-                      boxShadow: AppColors.primaryGlow,
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.esEdicion
-                            ? 'Guardar cambios'
-                            : 'Crear asignatura',
-                        style: AppTypography.button.copyWith(
-                          color: AppColors.textOnDark,
-                        ),
+                  onTap: _guardando ? null : _guardar,
+                  child: Opacity(
+                    opacity: _guardando ? 0.6 : 1,
+                    child: Container(
+                      height: AppDimensions.buttonHeight,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusMd),
+                        boxShadow: AppColors.primaryGlow,
+                      ),
+                      child: Center(
+                        child: _guardando
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.4,
+                                  color: AppColors.textOnDark,
+                                ),
+                              )
+                            : Text(
+                                widget.esEdicion
+                                    ? 'Guardar cambios'
+                                    : 'Crear asignatura',
+                                style: AppTypography.button.copyWith(
+                                  color: AppColors.textOnDark,
+                                ),
+                              ),
                       ),
                     ),
                   ),

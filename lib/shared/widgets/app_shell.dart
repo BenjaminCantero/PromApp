@@ -7,7 +7,11 @@ import 'app_bottom_nav.dart';
 /// Shell principal: mantiene el estado de cada tab (StatefulShellRoute) y
 /// muestra la barra de navegación inferior flotante.
 ///
-/// Añade una transición suave (fade + leve slide vertical) al cambiar de tab.
+/// ⚠️ No envolver `navigationShell` en un `AnimatedSwitcher` (ni en nada que
+/// mantenga el hijo saliente y el entrante vivos a la vez): `navigationShell`
+/// lleva una `GlobalKey` interna y tener dos instancias montadas rompe el
+/// árbol con «Duplicate GlobalKey». Para animar el cambio de tab hay que
+/// hacerlo dentro de `StatefulShellRoute.navigatorContainerBuilder`.
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.navigationShell});
 
@@ -36,10 +40,7 @@ class _AppShellState extends State<AppShell> {
     ),
   ];
 
-  int _prevIndex = 0;
-
   void _onTap(int index) {
-    setState(() => _prevIndex = widget.navigationShell.currentIndex);
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
@@ -48,47 +49,13 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final currentIndex = widget.navigationShell.currentIndex;
-    // Dirección: hacia la derecha si el índice sube, hacia la izquierda si baja
-    final goingRight = currentIndex > _prevIndex;
-    final slideBegin = Offset(goingRight ? 0.04 : -0.04, 0.0);
-
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, animation) {
-          final fadeAnim = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          );
-          final slideAnim = Tween<Offset>(
-            begin: slideBegin,
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          ));
-          return FadeTransition(
-            opacity: fadeAnim,
-            child: SlideTransition(
-              position: slideAnim,
-              child: child,
-            ),
-          );
-        },
-        // La key debe cambiar al cambiar de tab para que AnimatedSwitcher detecte el swap
-        child: KeyedSubtree(
-          key: ValueKey(currentIndex),
-          child: widget.navigationShell,
-        ),
-      ),
+      body: widget.navigationShell,
       bottomNavigationBar: AppBottomNav(
         items: _items,
-        currentIndex: currentIndex,
+        currentIndex: widget.navigationShell.currentIndex,
         onTap: _onTap,
       ),
     );
