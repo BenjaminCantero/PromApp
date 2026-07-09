@@ -4,11 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:promapp/app.dart';
 import 'package:promapp/core/router/app_router.dart';
 
+import 'helpers/auth_test_helper.dart';
+
 void main() {
   setUp(() => appRouter.go(AppRoutes.dashboard));
 
   Future<void> abrirSimulador(WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: PromApp()));
+    await tester.pumpWidget(ProviderScope(overrides: loggedInOverrides, child: const PromApp()));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Calcular'));
     await tester.pumpAndSettle();
