@@ -7,11 +7,8 @@ import 'app_bottom_nav.dart';
 /// Shell principal: mantiene el estado de cada tab (StatefulShellRoute) y
 /// muestra la barra de navegación inferior flotante.
 ///
-/// ⚠️ No envolver `navigationShell` en un `AnimatedSwitcher` (ni en nada que
-/// mantenga el hijo saliente y el entrante vivos a la vez): `navigationShell`
-/// lleva una `GlobalKey` interna y tener dos instancias montadas rompe el
-/// árbol con «Duplicate GlobalKey». Para animar el cambio de tab hay que
-/// hacerlo dentro de `StatefulShellRoute.navigatorContainerBuilder`.
+/// Usa fade manual con AnimationController para evitar el bug de
+/// GlobalKey duplicada que ocurre con AnimatedSwitcher + KeyedSubtree.
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.navigationShell});
 
@@ -21,7 +18,8 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends State<AppShell>
+    with SingleTickerProviderStateMixin {
   static const _items = [
     NavItem(
       icon: Icons.home_outlined,
@@ -40,10 +38,35 @@ class _AppShellState extends State<AppShell> {
     ),
   ];
 
-  void _onTap(int index) {
-    widget.navigationShell.goBranch(
-      index,
-      initialLocation: index == widget.navigationShell.currentIndex,
+  late final AnimationController _fadeCtrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 160),
+    value: 1.0,
+  );
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onTap(int index) async {
+    if (index == widget.navigationShell.currentIndex) {
+      widget.navigationShell.goBranch(index, initialLocation: true);
+      return;
+    }
+    // Fade out → cambiar tab → fade in
+    await _fadeCtrl.animateTo(
+      0,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeIn,
+    );
+    if (!mounted) return;
+    widget.navigationShell.goBranch(index);
+    await _fadeCtrl.animateTo(
+      1,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
     );
   }
 
@@ -52,7 +75,10 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
-      body: widget.navigationShell,
+      body: FadeTransition(
+        opacity: _fadeCtrl,
+        child: widget.navigationShell,
+      ),
       bottomNavigationBar: AppBottomNav(
         items: _items,
         currentIndex: widget.navigationShell.currentIndex,
