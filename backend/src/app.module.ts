@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AsignaturasModule } from './asignaturas/asignaturas.module';
 import { AuthModule } from './auth/auth.module';
+import { IpThrottlerGuard } from './common/ip-throttler.guard';
 import { validateEnv } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
@@ -28,8 +29,9 @@ import { UsersModule } from './users/users.module';
   controllers: [AppController],
   providers: [
     AppService,
-    // Aplica el rate limiting a toda la app.
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Rate limiting global, agrupando por la IP real del cliente
+    // (el guard por defecto usa req.ip, poco fiable detrás del proxy).
+    { provide: APP_GUARD, useClass: IpThrottlerGuard },
   ],
 })
 export class AppModule {}
