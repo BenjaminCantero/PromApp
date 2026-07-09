@@ -1,15 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/dio_provider.dart';
+import '../data/api_asignatura_repository.dart';
 import '../data/asignatura_repository.dart';
-import '../data/mock_asignatura_repository.dart';
 import '../domain/asignatura.dart';
 
 /// Provee la implementación del repositorio.
 ///
-/// 👉 Único punto a cambiar cuando pasemos a sqflite / API:
-/// reemplazar `MockAsignaturaRepository()` por la nueva implementación.
+/// 👉 FASE 3: ahora usa la API real ([ApiAsignaturaRepository]).
+/// Para volver al mock en memoria (desarrollo sin backend) basta con:
+///   `return MockAsignaturaRepository();`
+/// (importando `../data/mock_asignatura_repository.dart`).
 final asignaturaRepositoryProvider = Provider<AsignaturaRepository>((ref) {
-  return MockAsignaturaRepository();
+  return ApiAsignaturaRepository(ref.watch(dioProvider));
 });
 
 /// Lista de asignaturas (asíncrona: soporta carga desde BD/API).

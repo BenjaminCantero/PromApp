@@ -1,4 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:promapp/features/asignaturas/application/asignatura_providers.dart';
+import 'package:promapp/features/asignaturas/data/mock_asignatura_repository.dart';
 import 'package:promapp/features/auth/application/auth_controller.dart';
 import 'package:promapp/features/auth/domain/auth_user.dart';
 
@@ -13,8 +14,10 @@ class _FakeAuthController extends AuthController {
       );
 }
 
-/// Overrides para montar `PromApp` con un usuario ya autenticado, de modo
-/// que las pruebas de UI lleguen directo a la app (dashboard/tabs).
+/// Overrides para montar `PromApp` en pruebas:
+/// - sesión ya iniciada (salta el login),
+/// - repositorio en memoria (mock), no la API real.
 final loggedInOverrides = [
   authControllerProvider.overrideWith(_FakeAuthController.new),
+  asignaturaRepositoryProvider.overrideWith((ref) => MockAsignaturaRepository()),
 ];

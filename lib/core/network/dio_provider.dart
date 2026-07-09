@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/auth/application/auth_controller.dart';
 import '../storage/token_storage.dart';
 import 'api_config.dart';
 
@@ -32,6 +33,19 @@ final dioProvider = Provider<Dio>((ref) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         handler.next(options);
+      },
+      onResponse: (response, handler) async {
+        // Token expirado/invalidado en una petición con sesión: cerrar sesión
+        // para que el AuthGate devuelva al login. (No afecta al 401 de un
+        // login fallido, porque ahí aún no hay token guardado.)
+        if (response.statusCode == 401) {
+          final habiaSesion = await storage.read();
+          if (habiaSesion != null && habiaSesion.isNotEmpty) {
+            await storage.clear();
+            ref.invalidate(authControllerProvider);
+          }
+        }
+        handler.next(response);
       },
     ),
   );
