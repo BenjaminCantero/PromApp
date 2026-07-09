@@ -8,6 +8,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../calculos/domain/calculo_service.dart';
 import '../../dashboard/presentation/widgets/promedio_donut.dart';
+import 'calculadora_libre_screen.dart';
 
 /// Tab 3: Simulador de Examen — Diseño Premium Dark.
 class HerramientasScreen extends StatefulWidget {
@@ -107,6 +108,10 @@ class _HerramientasScreenState extends State<HerramientasScreen> {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // ── Acceso rápido: Calculadora Libre ──
+                _AccesoCalculadoraLibre(),
+                const SizedBox(height: AppDimensions.xl),
+
                 // Card de resultado principal
                 _ResultadoPrincipal(sim: sim),
                 const SizedBox(height: AppDimensions.xl),
@@ -465,6 +470,80 @@ class _InputNota extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Acceso rápido a Calculadora Libre
+// ─────────────────────────────────────────────────────────────
+
+class _AccesoCalculadoraLibre extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: EdgeInsets.zero,
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF1E1B4B), Color(0xFF2D1B69)],
+      ),
+      border: false,
+      glowColor: AppColors.primary,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const CalculadoraLibreScreen(),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.lg),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.md),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.35),
+                ),
+              ),
+              child: const Icon(
+                Icons.calculate_rounded,
+                color: AppColors.primaryLight,
+                size: 26,
+              ),
+            ),
+            const SizedBox(width: AppDimensions.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Calculadora Libre',
+                    style: AppTypography.h3.copyWith(
+                      color: AppColors.textOnDark,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Calcula cualquier promedio sin guardar nada. Solo ingresa notas y ponderaciones.',
+                    style: AppTypography.bodySecondary.copyWith(
+                      color: AppColors.textOnDark.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppDimensions.sm),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 14,
+              color: AppColors.primaryLight,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
