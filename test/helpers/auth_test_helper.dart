@@ -3,6 +3,15 @@ import 'package:promapp/features/asignaturas/application/asignatura_providers.da
 import 'package:promapp/features/asignaturas/data/mock_asignatura_repository.dart';
 import 'package:promapp/features/auth/application/auth_controller.dart';
 import 'package:promapp/features/auth/domain/auth_user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// Simula SharedPreferences con el onboarding ya visto.
+///
+/// Sin esto, `_AuthGate` (app.dart) se queda esperando `onboardingDone()`
+/// para siempre: el canal de plataforma no existe en `flutter test`.
+void mockOnboardingVisto() {
+  SharedPreferences.setMockInitialValues({'onboarding_done': true});
+}
 
 /// AuthController falso que arranca con sesión iniciada, sin tocar red ni
 /// almacenamiento seguro (no disponibles en `flutter test`).

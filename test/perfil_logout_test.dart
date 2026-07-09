@@ -6,6 +6,7 @@ import 'package:promapp/app.dart';
 import 'helpers/auth_test_helper.dart';
 
 void main() {
+  setUp(mockOnboardingVisto);
 
   testWidgets('Abre Perfil desde el avatar y cierra sesión → vuelve al login',
       (tester) async {
