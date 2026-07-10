@@ -55,10 +55,7 @@ class AsignaturasScreen extends ConsumerWidget {
                             style: AppTypography.captionUppercase,
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            'Asignaturas',
-                            style: AppTypography.h1,
-                          ),
+                          Text('Asignaturas', style: AppTypography.h1),
                         ],
                       ),
                       // Botón nuevo
@@ -157,10 +154,7 @@ class _EmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppDimensions.xl),
-            Text(
-              'Sin asignaturas aún',
-              style: AppTypography.h3,
-            ),
+            Text('Sin asignaturas aún', style: AppTypography.h3),
             const SizedBox(height: AppDimensions.sm),
             Text(
               'Agrega tus ramos para comenzar\na registrar tus notas.',
@@ -204,7 +198,9 @@ class _AsignaturaCard extends StatelessWidget {
     final r = CalculoService.calcularAsignatura(asignatura);
     final prom = r.promedioFinal ?? r.promedioPresentacion;
     final color = _colorEstado(prom);
-    final estado = prom == null ? null : EstadoNota.clasificar(prom);
+    final estado = prom == null
+        ? null
+        : EstadoNota.clasificar(CalculoService.promedioOficial(prom));
 
     // Porcentaje evaluado para la mini barra
     final evaluado = r.pesoEvaluado / 100;
@@ -228,7 +224,7 @@ class _AsignaturaCard extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                prom == null ? '—' : prom.toStringAsFixed(1),
+                prom == null ? '—' : CalculoService.formatearPromedio(prom),
                 style: AppTypography.bodyBold.copyWith(
                   color: color,
                   fontSize: 16,
@@ -249,9 +245,10 @@ class _AsignaturaCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  [asignatura.codigo, asignatura.semestre]
-                      .where((s) => s != null && s.isNotEmpty)
-                      .join(' · '),
+                  [
+                    asignatura.codigo,
+                    asignatura.semestre,
+                  ].where((s) => s != null && s.isNotEmpty).join(' · '),
                   style: AppTypography.caption,
                 ),
                 const SizedBox(height: AppDimensions.sm),
@@ -260,8 +257,9 @@ class _AsignaturaCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(AppDimensions.radiusPill),
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusPill,
+                        ),
                         child: Stack(
                           children: [
                             Container(height: 4, color: AppColors.border),
@@ -306,8 +304,9 @@ class _AsignaturaCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.15),
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusPill),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusPill,
+                    ),
                   ),
                   child: Text(
                     estado.label,

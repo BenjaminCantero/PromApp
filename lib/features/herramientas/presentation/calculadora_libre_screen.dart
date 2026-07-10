@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../calculos/domain/calculo_service.dart';
 import '../../dashboard/presentation/widgets/promedio_donut.dart';
 
 /// Calculadora libre de notas — sin guardar ramo ni progreso.
@@ -25,7 +26,7 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
   // ── Sección examen ──
   bool _conExamen = false;
   final _notaExamenCtrl = TextEditingController();
-  final _pctExamenCtrl  = TextEditingController();
+  final _pctExamenCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -34,7 +35,10 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _resultScale = CurvedAnimation(parent: _resultAnim, curve: Curves.elasticOut);
+    _resultScale = CurvedAnimation(
+      parent: _resultAnim,
+      curve: Curves.elasticOut,
+    );
     for (int i = 0; i < 3; i++) {
       _filas.add(_FilaNota());
     }
@@ -56,22 +60,31 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
   // ──────────────────────────────────────────────
 
   _Resultado _calcular() {
-    final validas = _filas.where((f) => f.nota != null && f.pct != null).toList();
+    final validas = _filas
+        .where((f) => f.nota != null && f.pct != null)
+        .toList();
     if (validas.isEmpty) return const _Resultado.vacia();
 
     final sumaPct = validas.fold<double>(0, (acc, f) => acc + f.pct!);
     if (sumaPct <= 0) return const _Resultado.vacia();
 
-    final sumaPond = validas.fold<double>(0, (acc, f) => acc + f.nota! * f.pct!);
+    final sumaPond = validas.fold<double>(
+      0,
+      (acc, f) => acc + f.nota! * f.pct!,
+    );
     final promedioPres = sumaPond / sumaPct;
     final pctUsado = _filas.fold<double>(0, (acc, f) => acc + (f.pct ?? 0));
 
     // ── Cálculo con examen ──
-    final notaEx  = double.tryParse(_notaExamenCtrl.text.replaceAll(',', '.'));
-    final pctEx   = double.tryParse(_pctExamenCtrl.text.replaceAll(',', '.'));
+    final notaEx = double.tryParse(_notaExamenCtrl.text.replaceAll(',', '.'));
+    final pctEx = double.tryParse(_pctExamenCtrl.text.replaceAll(',', '.'));
     double? notaFinal;
-    if (_conExamen && notaEx != null && pctEx != null && pctEx > 0 && pctEx < 100) {
-      final pesoEx  = pctEx / 100.0;
+    if (_conExamen &&
+        notaEx != null &&
+        pctEx != null &&
+        pctEx > 0 &&
+        pctEx < 100) {
+      final pesoEx = pctEx / 100.0;
       final pesoPresEfectivo = 1.0 - pesoEx;
       notaFinal = promedioPres * pesoPresEfectivo + notaEx * pesoEx;
     }
@@ -147,9 +160,13 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                       size: 20,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.textOnDark.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.textOnDark.withValues(
+                        alpha: 0.1,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusSm,
+                        ),
                       ),
                     ),
                   ),
@@ -158,7 +175,10 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('CALCULADORA', style: AppTypography.captionUppercase),
+                        Text(
+                          'CALCULADORA',
+                          style: AppTypography.captionUppercase,
+                        ),
                         const SizedBox(height: 4),
                         Text(
                           'Cálculo Libre',
@@ -186,9 +206,13 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                       size: 20,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.textOnDark.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.textOnDark.withValues(
+                        alpha: 0.1,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusSm,
+                        ),
                       ),
                     ),
                   ),
@@ -209,7 +233,10 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
               delegate: SliverChildListDelegate([
                 // --- Resultado principal ---
                 ScaleTransition(
-                  scale: Tween<double>(begin: 0.96, end: 1.0).animate(_resultScale),
+                  scale: Tween<double>(
+                    begin: 0.96,
+                    end: 1.0,
+                  ).animate(_resultScale),
                   child: _ResultadoCard(resultado: resultado),
                 ),
                 const SizedBox(height: AppDimensions.xl),
@@ -255,8 +282,9 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                             padding: const EdgeInsets.all(AppDimensions.xs + 2),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withValues(alpha: 0.15),
-                              borderRadius:
-                                  BorderRadius.circular(AppDimensions.radiusSm - 2),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusSm - 2,
+                              ),
                             ),
                             child: const Icon(
                               Icons.table_rows_rounded,
@@ -265,7 +293,10 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                             ),
                           ),
                           const SizedBox(width: AppDimensions.sm),
-                          Text('Notas & Ponderaciones', style: AppTypography.h3),
+                          Text(
+                            'Notas & Ponderaciones',
+                            style: AppTypography.h3,
+                          ),
                           const Spacer(),
                           Text(
                             '${_filas.length} filas',
@@ -335,8 +366,9 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                               vertical: AppDimensions.md,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(AppDimensions.radiusMd),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusMd,
+                              ),
                             ),
                           ),
                         ),
@@ -353,12 +385,18 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                     borderColor: AppColors.reprobado.withValues(alpha: 0.4),
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, color: AppColors.reprobado, size: 18),
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          color: AppColors.reprobado,
+                          size: 18,
+                        ),
                         const SizedBox(width: AppDimensions.sm),
                         Expanded(
                           child: Text(
                             'La suma de ponderaciones supera el 100%.',
-                            style: AppTypography.caption.copyWith(color: AppColors.reprobado),
+                            style: AppTypography.caption.copyWith(
+                              color: AppColors.reprobado,
+                            ),
                           ),
                         ),
                       ],
@@ -372,7 +410,10 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
                   activo: _conExamen,
                   notaCtrl: _notaExamenCtrl,
                   pctCtrl: _pctExamenCtrl,
-                  onToggle: (v) { setState(() => _conExamen = v); _resultAnim.forward(from: 0); },
+                  onToggle: (v) {
+                    setState(() => _conExamen = v);
+                    _resultAnim.forward(from: 0);
+                  },
                   onChanged: _onChanged,
                   resultado: resultado,
                 ),
@@ -419,11 +460,11 @@ class _Resultado {
   }) : vacia = false;
 
   const _Resultado.vacia()
-      : promedioPresentacion = 0,
-        pctUsado = 0,
-        cantNotas = 0,
-        notaFinal = null,
-        vacia = true;
+    : promedioPresentacion = 0,
+      pctUsado = 0,
+      cantNotas = 0,
+      notaFinal = null,
+      vacia = true;
 
   final bool vacia;
   final double promedioPresentacion;
@@ -434,27 +475,31 @@ class _Resultado {
   /// Nota a mostrar en el donut (final si hay examen, presentación si no)
   double get promedio => notaFinal ?? promedioPresentacion;
 
-  bool get aprobado => promedio >= 4.0;
+  bool get aprobado => CalculoService.promedioOficial(promedio) >= 4.0;
   bool get tieneExamen => notaFinal != null;
 
   Color _colorPara(double n) {
-    if (n >= 5.5) return AppColors.aprobado;
-    if (n >= 4.0) return const Color(0xFF34D399);
-    if (n >= 3.5) return AppColors.examen;
+    final oficial = CalculoService.promedioOficial(n);
+    if (oficial >= 5.5) return AppColors.aprobado;
+    if (oficial >= 4.0) return const Color(0xFF34D399);
+    if (oficial >= 3.5) return AppColors.examen;
     return AppColors.reprobado;
   }
 
   Color get color => vacia ? AppColors.textMuted : _colorPara(promedio);
-  Color get colorPres => vacia ? AppColors.textMuted : _colorPara(promedioPresentacion);
+  Color get colorPres =>
+      vacia ? AppColors.textMuted : _colorPara(promedioPresentacion);
 
-  String get texto => vacia ? '—' : promedio.toStringAsFixed(1);
-  String get textoPres => vacia ? '—' : promedioPresentacion.toStringAsFixed(1);
+  String get texto => vacia ? '—' : CalculoService.formatearPromedio(promedio);
+  String get textoPres =>
+      vacia ? '—' : CalculoService.formatearPromedio(promedioPresentacion);
 
   String get etiqueta {
     if (vacia) return 'sin datos';
-    if (promedio >= 5.5) return 'Excelente';
-    if (promedio >= 4.0) return 'Aprobado';
-    if (promedio >= 3.5) return 'Límite';
+    final oficial = CalculoService.promedioOficial(promedio);
+    if (oficial >= 5.5) return 'Excelente';
+    if (oficial >= 4.0) return 'Aprobado';
+    if (oficial >= 3.5) return 'Límite';
     return 'Reprobado';
   }
 
@@ -508,8 +553,9 @@ class _ResultadoCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: resultado.color.withValues(alpha: 0.15),
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusPill,
+                      ),
                     ),
                     child: Text(
                       resultado.aprobado ? '✓ Aprueba' : '✗ Reprueba',
@@ -620,9 +666,7 @@ class _FilaNotaWidget extends StatelessWidget {
             child: Text(
               '${index + 1}',
               style: AppTypography.caption.copyWith(
-                color: completa
-                    ? AppColors.primary
-                    : AppColors.textMuted,
+                color: completa ? AppColors.primary : AppColors.textMuted,
                 fontWeight: FontWeight.w700,
               ),
               textAlign: TextAlign.center,
@@ -697,9 +741,7 @@ class _CampoNota extends StatelessWidget {
       controller: controller,
       onChanged: onChanged,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-      ],
+      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
       style: AppTypography.body.copyWith(
         color: isValid ? AppColors.textPrimary : AppColors.textSecondary,
         fontSize: 13,
@@ -755,8 +797,9 @@ class _SeccionExamen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final notaEx = double.tryParse(notaCtrl.text.replaceAll(',', '.'));
-    final pctEx  = double.tryParse(pctCtrl.text.replaceAll(',', '.'));
-    final listo  = activo && notaEx != null && pctEx != null && pctEx > 0 && pctEx < 100;
+    final pctEx = double.tryParse(pctCtrl.text.replaceAll(',', '.'));
+    final listo =
+        activo && notaEx != null && pctEx != null && pctEx > 0 && pctEx < 100;
 
     return AppCard(
       padding: const EdgeInsets.all(AppDimensions.lg),
@@ -774,7 +817,9 @@ class _SeccionExamen extends StatelessWidget {
                 padding: const EdgeInsets.all(AppDimensions.xs + 2),
                 decoration: BoxDecoration(
                   color: AppColors.examen.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusSm - 2),
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.radiusSm - 2,
+                  ),
                 ),
                 child: const Icon(
                   Icons.school_rounded,
@@ -824,7 +869,10 @@ class _SeccionExamen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Nota examen', style: AppTypography.label),
+                                  Text(
+                                    'Nota examen',
+                                    style: AppTypography.label,
+                                  ),
                                   const SizedBox(height: 6),
                                   _CampoNota(
                                     controller: notaCtrl,
@@ -840,7 +888,10 @@ class _SeccionExamen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Ponderación examen', style: AppTypography.label),
+                                  Text(
+                                    'Ponderación examen',
+                                    style: AppTypography.label,
+                                  ),
                                   const SizedBox(height: 6),
                                   _CampoNota(
                                     controller: pctCtrl,
@@ -862,10 +913,10 @@ class _SeccionExamen extends StatelessWidget {
                             padding: const EdgeInsets.all(AppDimensions.md),
                             decoration: BoxDecoration(
                               color: AppColors.surfaceAlt,
-                              borderRadius:
-                                  BorderRadius.circular(AppDimensions.radiusMd),
-                              border: Border.all(
-                                  color: AppColors.borderLight),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusMd,
+                              ),
+                              border: Border.all(color: AppColors.borderLight),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -936,13 +987,15 @@ class _ResumenNota extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           valor,
-          style: (grande ? AppTypography.h1 : AppTypography.h2)
-              .copyWith(color: color),
+          style: (grande ? AppTypography.h1 : AppTypography.h2).copyWith(
+            color: color,
+          ),
         ),
         if (pct.isNotEmpty)
-          Text(pct, style: AppTypography.caption.copyWith(
-            color: AppColors.textMuted,
-          )),
+          Text(
+            pct,
+            style: AppTypography.caption.copyWith(color: AppColors.textMuted),
+          ),
       ],
     );
   }

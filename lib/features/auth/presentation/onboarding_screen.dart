@@ -145,11 +145,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, anim, __) => const AuthScreen(),
-        transitionsBuilder: (_, anim, __, child) => FadeTransition(
-          opacity: anim,
-          child: child,
-        ),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const AuthScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
         transitionDuration: const Duration(milliseconds: 400),
       ),
     );
@@ -278,7 +277,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOutCubic,
                     margin: const EdgeInsets.symmetric(
-                        horizontal: AppDimensions.xs),
+                      horizontal: AppDimensions.xs,
+                    ),
                     width: active ? 24 : 8,
                     height: 8,
                     decoration: BoxDecoration(
@@ -308,17 +308,20 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.textSecondary,
                             side: const BorderSide(color: AppColors.border),
-                            minimumSize: const Size(0, AppDimensions.buttonHeight),
+                            minimumSize: const Size(
+                              0,
+                              AppDimensions.buttonHeight,
+                            ),
                             shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(AppDimensions.radiusMd),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusMd,
+                              ),
                             ),
                           ),
                           child: const Text('Atrás'),
                         ),
                       ),
-                    if (_pagina > 0)
-                      const SizedBox(width: AppDimensions.md),
+                    if (_pagina > 0) const SizedBox(width: AppDimensions.md),
 
                     // Botón siguiente / entrar
                     Expanded(
@@ -326,8 +329,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: slide.gradiente,
-                          borderRadius:
-                              BorderRadius.circular(AppDimensions.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.radiusMd,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: slide.color.withValues(alpha: 0.4),
@@ -341,11 +345,14 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
-                            minimumSize:
-                                const Size(0, AppDimensions.buttonHeight),
+                            minimumSize: const Size(
+                              0,
+                              AppDimensions.buttonHeight,
+                            ),
                             shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(AppDimensions.radiusMd),
+                              borderRadius: BorderRadius.circular(
+                                AppDimensions.radiusMd,
+                              ),
                             ),
                           ),
                           child: Row(
@@ -355,8 +362,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                 _pagina == _slides.length - 1
                                     ? 'Comenzar'
                                     : 'Siguiente',
-                                style: AppTypography.button
-                                    .copyWith(color: Colors.white),
+                                style: AppTypography.button.copyWith(
+                                  color: Colors.white,
+                                ),
                               ),
                               const SizedBox(width: AppDimensions.sm),
                               Icon(
@@ -401,10 +409,14 @@ class _SlideWidgetState extends State<_SlideWidget>
     duration: const Duration(milliseconds: 700),
   )..forward();
 
-  late final Animation<double> _scale =
-      CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut);
-  late final Animation<double> _fade =
-      CurvedAnimation(parent: _ctrl, curve: const Interval(0.0, 0.6));
+  late final Animation<double> _scale = CurvedAnimation(
+    parent: _ctrl,
+    curve: Curves.elasticOut,
+  );
+  late final Animation<double> _fade = CurvedAnimation(
+    parent: _ctrl,
+    curve: const Interval(0.0, 0.6),
+  );
 
   @override
   void dispose() {
@@ -433,8 +445,9 @@ class _SlideWidgetState extends State<_SlideWidget>
                 height: 120,
                 decoration: BoxDecoration(
                   gradient: s.gradiente,
-                  borderRadius:
-                      BorderRadius.circular(AppDimensions.radiusXl + 8),
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.radiusXl + 8,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: s.color.withValues(alpha: 0.4),
@@ -488,16 +501,15 @@ class _SlideWidgetState extends State<_SlideWidget>
               decoration: BoxDecoration(
                 color: s.color.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                border: Border.all(
-                  color: s.color.withValues(alpha: 0.2),
-                ),
+                border: Border.all(color: s.color.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: s.detalle.map((d) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(
-                        vertical: AppDimensions.xs + 1),
+                      vertical: AppDimensions.xs + 1,
+                    ),
                     child: Text(
                       d,
                       style: AppTypography.body.copyWith(

@@ -1,3 +1,4 @@
+import '../../../core/constants/app_constants.dart';
 import '../../asignaturas/domain/asignatura.dart';
 import '../../asignaturas/domain/evaluacion.dart';
 import 'estado_nota.dart';
@@ -39,6 +40,28 @@ class ResultadoAsignatura {
 class CalculoService {
   CalculoService._();
 
+  /// Formatea un promedio con 2 decimales para mostrar el cálculo real.
+  static String formatearPromedio(double promedio) {
+    return promedio.toStringAsFixed(2);
+  }
+
+  /// Promedio oficial/aproximado a 1 decimal para estado académico.
+  ///
+  /// Caso borde de aprobación: si el cálculo real queda sobre 3.9 y bajo 4.0,
+  /// se muestra como 4.0 para reflejar la aproximación habitual de cierre.
+  static double promedioOficial(double promedio) {
+    if (promedio > AppConstants.examenMax &&
+        promedio < AppConstants.notaAprobacion) {
+      return AppConstants.notaAprobacion;
+    }
+    return (promedio * 10).round() / 10.0;
+  }
+
+  /// Formatea el promedio oficial/aproximado con 1 decimal.
+  static String formatearPromedioOficial(double promedio) {
+    return promedioOficial(promedio).toStringAsFixed(1);
+  }
+
   /// Promedio simple: suma(notas) / cantidad.
   ///
   /// Devuelve `null` si la lista está vacía.
@@ -56,8 +79,10 @@ class CalculoService {
     final rendidas = evaluaciones.where((e) => e.rendida);
     final sumaPesos = rendidas.fold<double>(0, (acc, e) => acc + e.porcentaje);
     if (sumaPesos == 0) return null;
-    final sumaPonderada =
-        rendidas.fold<double>(0, (acc, e) => acc + e.nota! * e.porcentaje);
+    final sumaPonderada = rendidas.fold<double>(
+      0,
+      (acc, e) => acc + e.nota! * e.porcentaje,
+    );
     return sumaPonderada / sumaPesos;
   }
 
@@ -78,7 +103,8 @@ class CalculoService {
     required double objetivo,
     required List<Evaluacion> evaluaciones,
   }) {
-    final contribucionActual = evaluaciones
+    final contribucionActual =
+        evaluaciones
             .where((e) => e.rendida)
             .fold<double>(0, (acc, e) => acc + e.nota! * e.porcentaje) /
         100.0;
@@ -106,7 +132,8 @@ class CalculoService {
     final evaluado = pesoEvaluado(a.evaluaciones);
     final pendiente = 100.0 - evaluado;
 
-    final eximido = a.notaEximir != null &&
+    final eximido =
+        a.notaEximir != null &&
         presentacion != null &&
         presentacion >= a.notaEximir!;
 
@@ -118,8 +145,8 @@ class CalculoService {
       finalProm = presentacion;
     } else if (a.notaExamen != null) {
       // Examen ya rendido → ponderación presentación/examen.
-      finalProm = presentacion * a.pesoPresentacion +
-          a.notaExamen! * a.pesoExamen;
+      finalProm =
+          presentacion * a.pesoPresentacion + a.notaExamen! * a.pesoExamen;
     } else {
       // Tiene examen pero aún no se rinde → no se puede proyectar el final.
       finalProm = null;
@@ -131,7 +158,9 @@ class CalculoService {
       pesoPendiente: pendiente,
       eximido: eximido,
       promedioFinal: finalProm,
-      estado: finalProm == null ? null : EstadoNota.clasificar(finalProm),
+      estado: finalProm == null
+          ? null
+          : EstadoNota.clasificar(promedioOficial(finalProm)),
     );
   }
 }

@@ -61,7 +61,8 @@ class _AsignaturaDetalleScreenState
             onNotaDeseadaChanged: (v) => setState(() => _notaDeseada = v),
             onEditarNota: (e) => _editarNota(a, e),
             onEditarExamen: () => _editarExamen(a),
-            onEditar: () => context.push(AppRoutes.asignaturaEditar(widget.asignaturaId)),
+            onEditar: () =>
+                context.push(AppRoutes.asignaturaEditar(widget.asignaturaId)),
           );
         },
       ),
@@ -69,8 +70,11 @@ class _AsignaturaDetalleScreenState
   }
 
   Future<void> _editarNota(Asignatura a, Evaluacion e) async {
-    final res = await showNotaDialog(context,
-        titulo: e.nombre, notaActual: e.nota);
+    final res = await showNotaDialog(
+      context,
+      titulo: e.nombre,
+      notaActual: e.nota,
+    );
     if (res == null) return;
     await _guardarNota(
       () => ref
@@ -80,8 +84,11 @@ class _AsignaturaDetalleScreenState
   }
 
   Future<void> _editarExamen(Asignatura a) async {
-    final res = await showNotaDialog(context,
-        titulo: 'Nota del Examen', notaActual: a.notaExamen);
+    final res = await showNotaDialog(
+      context,
+      titulo: 'Nota del Examen',
+      notaActual: a.notaExamen,
+    );
     if (res == null) return;
     await _guardarNota(
       () => ref
@@ -186,7 +193,9 @@ class _DetalleHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prom = resultado.promedioFinal ?? resultado.promedioPresentacion;
-    final estado = prom == null ? null : EstadoNota.clasificar(prom);
+    final estado = prom == null
+        ? null
+        : EstadoNota.clasificar(CalculoService.promedioOficial(prom));
 
     final Color donutColor = switch (estado) {
       EstadoNota.aprobado => AppColors.aprobado,
@@ -196,9 +205,7 @@ class _DetalleHeader extends StatelessWidget {
     };
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.heroGradient,
-      ),
+      decoration: const BoxDecoration(gradient: AppColors.heroGradient),
       padding: EdgeInsets.fromLTRB(
         AppDimensions.screenPadding,
         topPad + AppDimensions.sm,
@@ -227,15 +234,15 @@ class _DetalleHeader extends StatelessWidget {
                 label: const Text('Editar'),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primaryLight,
-                  backgroundColor:
-                      AppColors.primary.withValues(alpha: 0.15),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.15),
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppDimensions.md,
                     vertical: AppDimensions.sm,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(AppDimensions.radiusPill),
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusPill,
+                    ),
                   ),
                 ),
               ),
@@ -252,9 +259,10 @@ class _DetalleHeader extends StatelessWidget {
           const SizedBox(height: 4),
           if (asignatura.codigo != null || asignatura.semestre != null)
             Text(
-              [asignatura.codigo, asignatura.semestre]
-                  .where((s) => s != null && s.isNotEmpty)
-                  .join(' · '),
+              [
+                asignatura.codigo,
+                asignatura.semestre,
+              ].where((s) => s != null && s.isNotEmpty).join(' · '),
               style: AppTypography.bodySecondary.copyWith(
                 color: AppColors.textOnDark.withValues(alpha: 0.6),
               ),
@@ -268,10 +276,14 @@ class _DetalleHeader extends StatelessWidget {
             children: [
               PromedioDonut(
                 progreso: prom == null ? 0 : prom / AppConstants.notaMax,
-                valorCentral: prom == null ? '—' : prom.toStringAsFixed(1),
-                etiqueta: resultado.promedioFinal != null
-                    ? 'Final'
-                    : 'Presentación',
+                valorCentral: prom == null
+                    ? '—'
+                    : CalculoService.formatearPromedio(prom),
+                etiqueta: prom == null
+                    ? (resultado.promedioFinal != null
+                          ? 'Final'
+                          : 'Presentación')
+                    : '${resultado.promedioFinal != null ? 'Final' : 'Presentación'} ${CalculoService.formatearPromedioOficial(prom)}',
                 size: 130,
                 color: donutColor,
                 lightMode: true,
@@ -289,14 +301,12 @@ class _DetalleHeader extends StatelessWidget {
                     const SizedBox(height: AppDimensions.md),
                     _MiniStatHero(
                       label: 'Evaluado',
-                      valor:
-                          '${resultado.pesoEvaluado.toStringAsFixed(0)}%',
+                      valor: '${resultado.pesoEvaluado.toStringAsFixed(0)}%',
                     ),
                     const SizedBox(height: AppDimensions.md),
                     _MiniStatHero(
                       label: 'Pendiente',
-                      valor:
-                          '${resultado.pesoPendiente.toStringAsFixed(0)}%',
+                      valor: '${resultado.pesoPendiente.toStringAsFixed(0)}%',
                     ),
                   ],
                 ),
@@ -372,19 +382,25 @@ class _DesgloseCard extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text('Evaluación',
-                      style: AppTypography.captionUppercase),
+                  child: Text(
+                    'Evaluación',
+                    style: AppTypography.captionUppercase,
+                  ),
                 ),
                 Expanded(
-                  child: Text('%',
-                      style: AppTypography.captionUppercase,
-                      textAlign: TextAlign.center),
+                  child: Text(
+                    '%',
+                    style: AppTypography.captionUppercase,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 SizedBox(
                   width: 56,
-                  child: Text('Nota',
-                      style: AppTypography.captionUppercase,
-                      textAlign: TextAlign.right),
+                  child: Text(
+                    'Nota',
+                    style: AppTypography.captionUppercase,
+                    textAlign: TextAlign.right,
+                  ),
                 ),
               ],
             ),
@@ -433,8 +449,8 @@ class _FilaEvaluacion extends StatelessWidget {
     final color = nota == null
         ? AppColors.textMuted
         : (nota >= AppConstants.notaAprobacion
-            ? AppColors.aprobado
-            : AppColors.reprobado);
+              ? AppColors.aprobado
+              : AppColors.reprobado);
 
     return InkWell(
       onTap: onTap,
@@ -451,10 +467,12 @@ class _FilaEvaluacion extends StatelessWidget {
                 children: [
                   Text(evaluacion.nombre, style: AppTypography.body),
                   if (evaluacion.tipo != null)
-                    Text(evaluacion.tipo!,
-                        style: AppTypography.caption.copyWith(
-                          color: AppColors.primary.withValues(alpha: 0.8),
-                        )),
+                    Text(
+                      evaluacion.tipo!,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.primary.withValues(alpha: 0.8),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -517,8 +535,9 @@ class _FilaExamen extends StatelessWidget {
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: AppColors.examen.withValues(alpha: 0.15),
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusSm - 2),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusSm - 2,
+                      ),
                     ),
                     child: Icon(
                       Icons.assignment_rounded,
@@ -622,8 +641,7 @@ class _CalculadoraCard extends StatelessWidget {
                 inactiveTrackColor: AppColors.border,
                 thumbColor: AppColors.primary,
                 overlayColor: AppColors.primary.withValues(alpha: 0.15),
-                thumbShape:
-                    const RoundSliderThumbShape(enabledThumbRadius: 8),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
                 trackHeight: 4,
               ),
             ),
@@ -644,17 +662,15 @@ class _CalculadoraCard extends StatelessWidget {
             nota: necesaria,
           ),
           const SizedBox(height: AppDimensions.md),
-          _ResultadoNota(
-            label: 'Mínimo para aprobar (4.0)',
-            nota: minAprobar,
-          ),
+          _ResultadoNota(label: 'Mínimo para aprobar (4.0)', nota: minAprobar),
         ],
       ),
     );
   }
 
   double? _notaNecesaria(double objetivo) {
-    final tieneExamenPendiente = asignatura.tieneExamen &&
+    final tieneExamenPendiente =
+        asignatura.tieneExamen &&
         !resultado.eximido &&
         resultado.pesoPendiente == 0 &&
         resultado.promedioPresentacion != null;
@@ -710,9 +726,7 @@ class _ResultadoNota extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Text(label, style: AppTypography.body),
-          ),
+          Expanded(child: Text(label, style: AppTypography.body)),
           Text(
             texto,
             style: AppTypography.h3.copyWith(color: color, fontSize: 20),

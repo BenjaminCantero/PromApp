@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../calculos/domain/calculo_service.dart';
 import '../../domain/dashboard_data.dart';
 
 /// Fila "Rendimiento por Asignatura" — barra animada con gradiente.
@@ -14,6 +15,9 @@ class RendimientoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final prom = rendimiento.promedio;
+    final promOficial = prom == null
+        ? null
+        : CalculoService.promedioOficial(prom);
 
     // Color y gradiente según nota
     final Color color;
@@ -21,10 +25,10 @@ class RendimientoBar extends StatelessWidget {
     if (prom == null) {
       color = AppColors.textMuted;
       gradColors = [AppColors.textMuted, AppColors.textMuted];
-    } else if (prom >= 5.5) {
+    } else if (promOficial! >= 5.5) {
       color = AppColors.aprobado;
       gradColors = [AppColors.aprobado, AppColors.aprobadoLight];
-    } else if (prom >= 4.0) {
+    } else if (promOficial >= 4.0) {
       color = AppColors.primary;
       gradColors = [AppColors.primary, AppColors.primaryLight];
     } else {
@@ -59,7 +63,7 @@ class RendimientoBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                 ),
                 child: Text(
-                  prom == null ? '—' : prom.toStringAsFixed(1),
+                  prom == null ? '—' : CalculoService.formatearPromedio(prom),
                   style: AppTypography.bodyBold.copyWith(
                     color: color,
                     fontSize: 13,

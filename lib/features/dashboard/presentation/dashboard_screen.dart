@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/error_retry.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../calculos/domain/calculo_service.dart';
 import '../application/dashboard_provider.dart';
 import '../domain/dashboard_data.dart';
 import 'widgets/promedio_donut.dart';
@@ -33,10 +34,7 @@ class DashboardScreen extends ConsumerWidget {
           error: e,
           onRetry: () => ref.invalidate(dashboardProvider),
         ),
-        data: (data) => _DashboardBody(
-          data: data,
-          nombre: _nombreUsuario(ref),
-        ),
+        data: (data) => _DashboardBody(data: data, nombre: _nombreUsuario(ref)),
       ),
     );
   }
@@ -102,9 +100,7 @@ class _HeroSliverAppBar extends StatelessWidget {
 
     return SliverToBoxAdapter(
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.heroGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.heroGradient),
         child: Stack(
           children: [
             // Círculo decorativo de fondo
@@ -211,7 +207,7 @@ class _HeroSliverAppBar extends StatelessWidget {
                         progreso: data.progresoGeneral,
                         valorCentral: prom == null
                             ? '—'
-                            : prom.toStringAsFixed(1),
+                            : CalculoService.formatearPromedio(prom),
                         etiqueta: data.rendimientoLabel,
                         size: 148,
                         lightMode: true,
@@ -231,14 +227,16 @@ class _HeroSliverAppBar extends StatelessWidget {
                             const SizedBox(height: AppDimensions.md),
                             _HeroStat(
                               label: 'Aprobados',
-                              valor: '${data.rendimientos.where((r) => (r.promedio ?? 0) >= 4.0).length}',
+                              valor:
+                                  '${data.rendimientos.where((r) => r.aprobado).length}',
                               icon: Icons.check_circle_rounded,
                               color: AppColors.aprobado,
                             ),
                             const SizedBox(height: AppDimensions.md),
                             _HeroStat(
                               label: 'En riesgo',
-                              valor: '${data.rendimientos.where((r) => r.promedio != null && r.promedio! < 4.0).length}',
+                              valor:
+                                  '${data.rendimientos.where((r) => r.enRiesgo).length}',
                               icon: Icons.warning_amber_rounded,
                               color: AppColors.reprobado,
                             ),
@@ -316,10 +314,7 @@ class _AccionesRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'ACCIONES RÁPIDAS',
-          style: AppTypography.captionUppercase,
-        ),
+        Text('ACCIONES RÁPIDAS', style: AppTypography.captionUppercase),
         const SizedBox(height: AppDimensions.md),
         Row(
           children: [
@@ -390,10 +385,7 @@ class _AccionCard extends StatelessWidget {
             child: Icon(icon, color: fgColor, size: 20),
           ),
           const SizedBox(height: AppDimensions.md),
-          Text(
-            titulo,
-            style: AppTypography.h3.copyWith(color: fgColor),
-          ),
+          Text(titulo, style: AppTypography.h3.copyWith(color: fgColor)),
           const SizedBox(height: 3),
           Text(
             subtitulo,
@@ -468,10 +460,7 @@ class _ProximasEvaluacionesCard extends StatelessWidget {
                     badgeBg: _colores[i % _colores.length].$2,
                   ),
                   if (i < items.length - 1)
-                    Divider(
-                      color: AppColors.border,
-                      height: 1,
-                    ),
+                    Divider(color: AppColors.border, height: 1),
                 ],
             ],
           ),

@@ -51,22 +51,28 @@ void main() {
     test('sin peso pendiente → null', () {
       final evals = [ev('a', 100, 5.0)];
       expect(
-        CalculoService.notaNecesariaRestante(objetivo: 6.0, evaluaciones: evals),
+        CalculoService.notaNecesariaRestante(
+          objetivo: 6.0,
+          evaluaciones: evals,
+        ),
         isNull,
       );
     });
 
-    test('objetivo inalcanzable devuelve valor > 7 (UI decide "imposible")', () {
-      final evals = [ev('a', 80, 3.0), ev('b', 20)];
-      // contribución = 3*80/100 = 2.4 ; pendiente = 0.2
-      // (4.0 - 2.4)/0.2 = 8.0  → > 7.0
-      final r = CalculoService.notaNecesariaRestante(
-        objetivo: 4.0,
-        evaluaciones: evals,
-      );
-      expect(r, closeTo(8.0, 1e-9));
-      expect(r! > 7.0, isTrue);
-    });
+    test(
+      'objetivo inalcanzable devuelve valor > 7 (UI decide "imposible")',
+      () {
+        final evals = [ev('a', 80, 3.0), ev('b', 20)];
+        // contribución = 3*80/100 = 2.4 ; pendiente = 0.2
+        // (4.0 - 2.4)/0.2 = 8.0  → > 7.0
+        final r = CalculoService.notaNecesariaRestante(
+          objetivo: 4.0,
+          evaluaciones: evals,
+        );
+        expect(r, closeTo(8.0, 1e-9));
+        expect(r! > 7.0, isTrue);
+      },
+    );
   });
 
   group('notaNecesariaExamen', () {
@@ -137,6 +143,23 @@ void main() {
       expect(r.eximido, isFalse);
       expect(r.promedioFinal, isNull);
       expect(r.estado, isNull);
+    });
+  });
+
+  group('formato y aproximación de promedios', () {
+    test('muestra el promedio real con dos decimales', () {
+      expect(CalculoService.formatearPromedio(3.93), '3.93');
+      expect(CalculoService.formatearPromedio(3.95), '3.95');
+    });
+
+    test('aproxima a 4.0 cuando queda sobre 3.9 y bajo 4.0', () {
+      expect(CalculoService.promedioOficial(3.93), 4.0);
+      expect(CalculoService.promedioOficial(3.95), 4.0);
+      expect(CalculoService.formatearPromedioOficial(3.93), '4.0');
+    });
+
+    test('mantiene 3.9 cuando no supera el borde de examen', () {
+      expect(CalculoService.promedioOficial(3.90), 3.9);
     });
   });
 

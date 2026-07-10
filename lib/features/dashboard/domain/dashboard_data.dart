@@ -1,13 +1,11 @@
 import '../../asignaturas/domain/asignatura.dart';
 import '../../asignaturas/domain/evaluacion.dart';
+import '../../calculos/domain/calculo_service.dart';
 
 /// Una evaluación próxima (con nota pendiente y fecha futura), lista para
 /// mostrarse en la sección "Próximas Evaluaciones" del dashboard.
 class ProximaEvaluacion {
-  const ProximaEvaluacion({
-    required this.asignatura,
-    required this.evaluacion,
-  });
+  const ProximaEvaluacion({required this.asignatura, required this.evaluacion});
 
   final Asignatura asignatura;
   final Evaluacion evaluacion;
@@ -35,10 +33,7 @@ class ProximaEvaluacion {
 
 /// Rendimiento de un ramo para la barra "Rendimiento por Asignatura".
 class RendimientoAsignatura {
-  const RendimientoAsignatura({
-    required this.nombre,
-    required this.promedio,
-  });
+  const RendimientoAsignatura({required this.nombre, required this.promedio});
 
   final String nombre;
 
@@ -47,6 +42,13 @@ class RendimientoAsignatura {
 
   /// Progreso 0.0–1.0 para la barra (promedio / 7.0).
   double get progreso => promedio == null ? 0 : (promedio! / 7.0).clamp(0, 1);
+
+  double? get promedioOficial =>
+      promedio == null ? null : CalculoService.promedioOficial(promedio!);
+
+  bool get aprobado => promedioOficial != null && promedioOficial! >= 4.0;
+
+  bool get enRiesgo => promedioOficial != null && promedioOficial! < 4.0;
 }
 
 /// Datos agregados que consume la pantalla Dashboard.
@@ -71,9 +73,10 @@ class DashboardData {
   String get rendimientoLabel {
     final p = promedioGeneral;
     if (p == null) return 'Sin notas';
-    if (p >= 6.0) return 'Rendimiento Alto';
-    if (p >= 5.0) return 'Rendimiento Medio';
-    if (p >= 4.0) return 'Rendimiento Suficiente';
+    final oficial = CalculoService.promedioOficial(p);
+    if (oficial >= 6.0) return 'Rendimiento Alto';
+    if (oficial >= 5.0) return 'Rendimiento Medio';
+    if (oficial >= 4.0) return 'Rendimiento Suficiente';
     return 'Rendimiento Bajo';
   }
 }
