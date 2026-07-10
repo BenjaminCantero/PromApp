@@ -5,9 +5,10 @@ import 'package:promapp/app.dart';
 import 'helpers/auth_test_helper.dart';
 
 void main() {
+  mockOnboardingVisto();
   testWidgets('La app arranca en el Dashboard', (WidgetTester tester) async {
     await tester.pumpWidget(
-        ProviderScope(overrides: loggedInOverrides, child: const PromApp()));
+        ProviderScope(overrides: testOverrides, child: const PromApp()));
     await tester.pumpAndSettle();
 
     // El dashboard muestra su sección principal.

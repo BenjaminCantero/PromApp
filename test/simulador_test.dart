@@ -6,13 +6,14 @@ import 'package:promapp/app.dart';
 import 'helpers/auth_test_helper.dart';
 
 void main() {
+  mockOnboardingVisto();
   /// Abre la tab "Calcular" y deja visibles los campos de entrada.
   ///
   /// En la pantalla, las tarjetas de resultado van ARRIBA y los campos de
   /// "Parámetros de Evaluación" más abajo (SliverList lazy) → hay que bajar.
   Future<void> abrirSimulador(WidgetTester tester) async {
     await tester.pumpWidget(
-      ProviderScope(overrides: loggedInOverrides, child: const PromApp()),
+      ProviderScope(overrides: testOverrides, child: const PromApp()),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Calcular'));

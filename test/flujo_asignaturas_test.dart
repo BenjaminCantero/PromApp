@@ -6,10 +6,11 @@ import 'package:promapp/app.dart';
 import 'helpers/auth_test_helper.dart';
 
 void main() {
+  mockOnboardingVisto();
 
   testWidgets('Navega a la lista y abre el detalle de una asignatura',
       (tester) async {
-    await tester.pumpWidget(ProviderScope(overrides: loggedInOverrides, child: const PromApp()));
+    await tester.pumpWidget(ProviderScope(overrides: testOverrides, child: const PromApp()));
     await tester.pumpAndSettle();
 
     // Ir a la tab "Ramos" (label del bottom nav).
@@ -33,7 +34,7 @@ void main() {
   });
 
   testWidgets('Abre el formulario de Nueva Asignatura', (tester) async {
-    await tester.pumpWidget(ProviderScope(overrides: loggedInOverrides, child: const PromApp()));
+    await tester.pumpWidget(ProviderScope(overrides: testOverrides, child: const PromApp()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Ramos'));

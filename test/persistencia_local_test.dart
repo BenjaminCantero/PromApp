@@ -4,12 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:promapp/core/storage/local_db_interface.dart';
 import 'package:promapp/core/storage/local_db_non_web.dart';
+import 'package:promapp/core/storage/local_db_provider.dart';
 import 'package:promapp/core/storage/token_storage.dart';
 import 'package:promapp/core/utils/backup_manager.dart';
 import 'package:promapp/features/asignaturas/data/local_asignatura_repository.dart';
 import 'package:promapp/features/asignaturas/domain/asignatura.dart';
 import 'package:promapp/features/asignaturas/domain/evaluacion.dart';
-import 'package:promapp/features/auth/data/auth_repository.dart';
+
 
 class MockTokenStorage extends TokenStorage {
   String? _token;
@@ -26,7 +27,6 @@ void main() {
 
   late LocalDb db;
   late LocalAsignaturaRepository repo;
-  late AuthRepository authRepo;
   late ProviderContainer container;
 
   setUp(() async {
@@ -45,7 +45,6 @@ void main() {
       ],
     );
     
-    authRepo = container.read(authRepositoryProvider);
   });
 
 
@@ -133,52 +132,7 @@ void main() {
     });
   });
 
-  group('Pruebas de Autenticación Local', () {
-    test('Registro y Login local', () async {
-      final user = await authRepo.register(
-        nombre: 'Benjamin',
-        email: 'benja@email.com',
-        password: 'password123',
-      );
 
-      expect(user.nombre, 'Benjamin');
-      expect(user.email, 'benja@email.com');
-
-      // Intentar login exitoso
-      final logueado = await authRepo.login(
-        email: 'benja@email.com',
-        password: 'password123',
-      );
-      expect(logueado.id, user.id);
-
-      // Intentar login fallido (contraseña incorrecta)
-      expect(
-        () => authRepo.login(email: 'benja@email.com', password: 'incorrecta'),
-        throwsA(isA<AuthException>()),
-      );
-    });
-
-    test('Cambio de contraseña local', () async {
-      await authRepo.register(
-        nombre: 'Benjamin',
-        email: 'benja@email.com',
-        password: 'password123',
-      );
-
-      // Cambiar contraseña
-      await authRepo.cambiarPassword(
-        passwordActual: 'password123',
-        passwordNueva: 'newpassword',
-      );
-
-      // Login con nueva contraseña
-      final logueado = await authRepo.login(
-        email: 'benja@email.com',
-        password: 'newpassword',
-      );
-      expect(logueado.nombre, 'Benjamin');
-    });
-  });
 
   group('Pruebas de Respaldo (Importación/Exportación)', () {
     test('Validación estricta de JSON corrupto e importación exitosa', () async {

@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
-import 'auth_screen.dart';
+
 
 const _kOnboardingKey = 'onboarding_done';
 
@@ -99,7 +99,8 @@ const _slides = [
 // ─────────────────────────────────────────────────────────────
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({super.key, this.onFinish});
+  final VoidCallback? onFinish;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -143,15 +144,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _entrarApp() async {
     await markOnboardingDone();
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const AuthScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(opacity: animation, child: child),
-        transitionDuration: const Duration(milliseconds: 400),
-      ),
-    );
+    widget.onFinish?.call();
   }
 
   void _onPageChanged(int p) {

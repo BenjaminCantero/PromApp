@@ -8,7 +8,7 @@ import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/error_retry.dart';
-import '../../auth/application/auth_controller.dart';
+
 import '../../calculos/domain/calculo_service.dart';
 import '../application/dashboard_provider.dart';
 import '../domain/dashboard_data.dart';
@@ -34,32 +34,23 @@ class DashboardScreen extends ConsumerWidget {
           error: e,
           onRetry: () => ref.invalidate(dashboardProvider),
         ),
-        data: (data) => _DashboardBody(data: data, nombre: _nombreUsuario(ref)),
+        data: (data) => _DashboardBody(data: data),
       ),
     );
-  }
-
-  /// Primer nombre del usuario autenticado (para el saludo del hero).
-  String _nombreUsuario(WidgetRef ref) {
-    final user = ref.watch(authControllerProvider).value;
-    final nombre = user?.nombre.trim() ?? '';
-    if (nombre.isEmpty) return 'Bienvenido';
-    return nombre.split(' ').first;
   }
 }
 
 class _DashboardBody extends StatelessWidget {
-  const _DashboardBody({required this.data, required this.nombre});
+  const _DashboardBody({required this.data});
 
   final DashboardData data;
-  final String nombre;
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
         // AppBar con hero gradient
-        _HeroSliverAppBar(data: data, nombre: nombre),
+        _HeroSliverAppBar(data: data),
 
         // Contenido principal
         SliverPadding(
@@ -86,12 +77,8 @@ class _DashboardBody extends StatelessWidget {
 
 // --- Hero SliverAppBar con gradiente y donut centrado ---
 class _HeroSliverAppBar extends StatelessWidget {
-  const _HeroSliverAppBar({required this.data, required this.nombre});
+  const _HeroSliverAppBar({required this.data});
   final DashboardData data;
-  final String nombre;
-
-  String _iniciales(String n) =>
-      n.trim().isEmpty ? '?' : n.trim()[0].toUpperCase();
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +144,7 @@ class _HeroSliverAppBar extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hola, $nombre 👋',
+                            'Bienvenido 👋',
                             style: AppTypography.caption.copyWith(
                               color: AppColors.primaryLight,
                               letterSpacing: 0.5,
@@ -172,7 +159,7 @@ class _HeroSliverAppBar extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Avatar → abre Perfil
+                      // Avatar → abre Perfil (ahora Ajustes)
                       GestureDetector(
                         key: const Key('perfil-avatar'),
                         onTap: () => context.push(AppRoutes.perfil),
@@ -184,12 +171,11 @@ class _HeroSliverAppBar extends StatelessWidget {
                             shape: BoxShape.circle,
                             boxShadow: AppColors.primaryGlow,
                           ),
-                          child: Center(
-                            child: Text(
-                              _iniciales(nombre),
-                              style: AppTypography.bodyBold.copyWith(
-                                color: AppColors.textOnDark,
-                              ),
+                          child: const Center(
+                            child: Icon(
+                              Icons.settings_rounded,
+                              color: AppColors.textOnDark,
+                              size: 20,
                             ),
                           ),
                         ),
