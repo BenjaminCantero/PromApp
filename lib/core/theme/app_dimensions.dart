@@ -5,13 +5,13 @@ class AppDimensions {
   AppDimensions._();
 
   // Espaciado (múltiplos de 4)
-  static const double xs = 4;
-  static const double sm = 8;
-  static const double md = 12;
-  static const double lg = 16;
-  static const double xl = 24;
-  static const double xxl = 32;
-  static const double xxxl = 48;
+  static const double xs = 6;
+  static const double sm = 10;
+  static const double md = 16;
+  static const double lg = 24;
+  static const double xl = 32;
+  static const double xxl = 48;
+  static const double xxxl = 64;
 
   // Radios
   static const double radiusSm = 10;
@@ -26,6 +26,6 @@ class AppDimensions {
   // Componentes
   static const double buttonHeight = 54;
   static const double inputHeight = 54;
-  static const double bottomNavHeight = 72;
+
   static const double chartStroke = 16; // grosor del donut de promedio
 }

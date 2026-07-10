@@ -12,7 +12,7 @@ class LocalDbImpl implements LocalDb {
     if (_db != null) return;
 
     final completer = Completer<void>();
-    final openRequest = html.window.indexedDB!.open('promapp_db', 1);
+    final openRequest = html.window.indexedDB!.open('promapp_db', version: 1);
 
     openRequest.onUpgradeNeeded.listen((event) {
       final db = openRequest.result;

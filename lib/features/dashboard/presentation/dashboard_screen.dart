@@ -63,9 +63,9 @@ class _DashboardBody extends StatelessWidget {
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               const _AccionesRow(),
-              const SizedBox(height: AppDimensions.xl),
+              const SizedBox(height: AppDimensions.xxl),
               _ProximasEvaluacionesCard(items: data.proximasEvaluaciones),
-              const SizedBox(height: AppDimensions.xl),
+              const SizedBox(height: AppDimensions.xxl),
               _RendimientoCard(rendimientos: data.rendimientos),
             ]),
           ),

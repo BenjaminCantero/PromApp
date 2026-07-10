@@ -32,18 +32,17 @@ class AppBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppDimensions.xl,
         0,
         AppDimensions.xl,
-        AppDimensions.xl,
+        MediaQuery.of(context).padding.bottom + (AppDimensions.xl * 0.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
-            height: AppDimensions.bottomNavHeight,
             decoration: BoxDecoration(
               color: AppColors.surfaceElevated.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
@@ -106,6 +105,7 @@ class _NavButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppDimensions.sm),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedContainer(

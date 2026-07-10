@@ -44,7 +44,9 @@ void main() {
     await tester.tap(find.text('Nuevo'));
     await tester.pumpAndSettle();
 
-    // Textos únicos del formulario de configuración.
+    // Scrollear para que el texto sea visible (ya que las tarjetas son más grandes)
+    await tester.dragFrom(const Offset(400, 300), const Offset(0, -300));
+    await tester.pumpAndSettle();
     expect(find.text('Información General'), findsOneWidget);
     expect(find.text('Nombre del ramo *'), findsOneWidget);
   });

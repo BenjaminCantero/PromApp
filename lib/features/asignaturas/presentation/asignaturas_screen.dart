@@ -115,7 +115,7 @@ class AsignaturasScreen extends ConsumerWidget {
                   sliver: SliverList.separated(
                     itemCount: asignaturas.length,
                     separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppDimensions.md),
+                        const SizedBox(height: AppDimensions.lg),
                     itemBuilder: (_, i) =>
                         _AsignaturaCard(asignatura: asignaturas[i]),
                   ),

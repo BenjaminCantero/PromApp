@@ -19,21 +19,15 @@ void main() {
     await tester.tap(find.text('Calcular'));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.text('Parámetros de Evaluación'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
+    await tester.dragFrom(const Offset(400, 150), const Offset(0, -400));
+    await tester.pumpAndSettle();
     expect(find.text('Parámetros de Evaluación'), findsOneWidget);
   }
 
-  /// Sube hasta que la tarjeta de resultado sea visible.
-  Future<void> subirHasta(WidgetTester tester, Finder objetivo) =>
-      tester.scrollUntilVisible(
-        objetivo,
-        -250,
-        scrollable: find.byType(Scrollable).first,
-      );
+  Future<void> subirHasta(WidgetTester tester, Finder objetivo) async {
+    await tester.dragFrom(const Offset(400, 150), const Offset(0, 400));
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('El simulador calcula la nota mínima de examen en vivo',
       (tester) async {

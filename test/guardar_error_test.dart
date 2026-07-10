@@ -58,11 +58,22 @@ void main() {
     // Nombre del ramo (primer TextField del formulario).
     await tester.enterText(find.byType(TextField).at(0), 'Cálculo I');
 
-    // Añadir una evaluación que sume 100%.
+    // Hacer scroll hasta el botón de añadir evaluación
+    await tester.ensureVisible(find.text('Añadir evaluación'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Añadir evaluación'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).at(3), 'Certamen 1');
-    await tester.enterText(find.byType(TextField).at(4), '100');
+    
+    // Al añadir, aparecen nuevos TextFields.
+    // Buscamos los que tienen hint "Nombre" y "0".
+    final tfNombre = find.widgetWithText(TextField, 'Nombre').first;
+    final tfPct = find.widgetWithText(TextField, '0').first;
+    
+    await tester.ensureVisible(tfNombre);
+    await tester.pumpAndSettle();
+    
+    await tester.enterText(tfNombre, 'Certamen 1');
+    await tester.enterText(tfPct, '100');
     await tester.pumpAndSettle();
 
     // Intentar guardar → la API falla. (El botón se construye lazy, bajo el fold.)
@@ -77,7 +88,16 @@ void main() {
 
     // Avisa del error...
     expect(find.text('No se pudo conectar con el servidor.'), findsOneWidget);
+    
     // ...y el formulario sigue abierto, sin perder lo escrito.
+    // Volvemos a hacer scroll arriba para que Riverpod/Flutter reconstruya la UI
+    await tester.scrollUntilVisible(
+      find.text('Información General'),
+      -250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    
     expect(find.text('Información General'), findsOneWidget);
     expect(find.text('Cálculo I'), findsOneWidget);
     expect(find.text('abrir'), findsNothing); // no volvió atrás
