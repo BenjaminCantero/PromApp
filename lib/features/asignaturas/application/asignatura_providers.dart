@@ -1,19 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/network/dio_provider.dart';
 import '../../auth/application/auth_controller.dart';
-import '../data/api_asignatura_repository.dart';
+import '../../auth/data/auth_repository.dart';
+import '../data/local_asignatura_repository.dart';
 import '../data/asignatura_repository.dart';
 import '../domain/asignatura.dart';
 
 /// Provee la implementación del repositorio.
 ///
-/// 👉 FASE 3: ahora usa la API real ([ApiAsignaturaRepository]).
-/// Para volver al mock en memoria (desarrollo sin backend) basta con:
-///   `return MockAsignaturaRepository();`
-/// (importando `../data/mock_asignatura_repository.dart`).
+/// Ahora usa la base de datos local (IndexedDB/SharedPreferences) [LocalAsignaturaRepository].
 final asignaturaRepositoryProvider = Provider<AsignaturaRepository>((ref) {
-  return ApiAsignaturaRepository(ref.watch(dioProvider));
+  return LocalAsignaturaRepository(ref.watch(localDbProvider));
 });
 
 /// Id del usuario autenticado (o `null` sin sesión).

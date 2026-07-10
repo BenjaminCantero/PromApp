@@ -25,4 +25,11 @@ export class UsersService {
   }): Promise<User> {
     return this.prisma.user.create({ data });
   }
+
+  updatePassword(id: string, hashedPassword: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+  }
 }

@@ -26,6 +26,12 @@ let UsersService = class UsersService {
     create(data) {
         return this.prisma.user.create({ data });
     }
+    updatePassword(id, hashedPassword) {
+        return this.prisma.user.update({
+            where: { id },
+            data: { password: hashedPassword },
+        });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

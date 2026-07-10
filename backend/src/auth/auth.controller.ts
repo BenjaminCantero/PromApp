@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { CambiarPasswordDto } from './dto/cambiar-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -43,5 +44,17 @@ export class AuthController {
     if (!full) return null;
     const { password: _omit, ...safe } = full;
     return safe;
+  }
+
+  @Patch('cambiar-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Cambiar contraseña del usuario autenticado' })
+  cambiarPassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CambiarPasswordDto,
+  ) {
+    return this.auth.cambiarPassword(user.id, dto);
   }
 }

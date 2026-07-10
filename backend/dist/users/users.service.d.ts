@@ -10,4 +10,5 @@ export declare class UsersService {
         password: string;
         nombre: string;
     }): Promise<User>;
+    updatePassword(id: string, hashedPassword: string): Promise<User>;
 }

@@ -17,11 +17,15 @@ void main() {
     // Tocar el avatar del hero abre la pantalla de Perfil.
     await tester.tap(find.byKey(const Key('perfil-avatar')));
     await tester.pumpAndSettle();
-    expect(find.text('Perfil'), findsOneWidget);
+    expect(find.text('Mi Perfil'), findsOneWidget);
     expect(find.text('test@promapp.cl'), findsWidgets);
 
-    // Cerrar sesión → confirmar en el diálogo.
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Cerrar sesión'));
+    // Hacer scroll hacia abajo en la pantalla de Perfil
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+
+    final logoutBtn = find.byType(OutlinedButton);
+    await tester.tap(logoutBtn);
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(TextButton, 'Cerrar sesión'));
     await tester.pumpAndSettle();

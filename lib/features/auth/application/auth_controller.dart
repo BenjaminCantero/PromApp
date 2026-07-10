@@ -58,6 +58,22 @@ class AuthController extends AsyncNotifier<AuthUser?> {
     state = const AsyncData(null);
   }
 
+  Future<void> cambiarPassword({
+    required String passwordActual,
+    required String passwordNueva,
+  }) async {
+    try {
+      await _repo.cambiarPassword(
+        passwordActual: passwordActual,
+        passwordNueva: passwordNueva,
+      );
+    } on AuthException {
+      rethrow;
+    } on DioException catch (e) {
+      throw AuthException(mensajeDeRed(e));
+    }
+  }
+
   /// Ejecuta una acción de auth traduciendo errores de red a [AuthException].
   Future<AuthUser> _run(Future<AuthUser> Function() action) async {
     try {

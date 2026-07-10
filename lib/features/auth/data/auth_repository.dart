@@ -1,7 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+import '../../../core/storage/local_db.dart';
 
-import '../../../core/network/dio_provider.dart';
+import '../../../core/storage/local_db_interface.dart';
 import '../../../core/storage/token_storage.dart';
 import '../domain/auth_user.dart';
 
@@ -13,86 +14,131 @@ class AuthException implements Exception {
   String toString() => mensaje;
 }
 
-/// Habla con los endpoints `/auth/*` del backend y persiste el token.
-///
-/// - `register` / `login` → guardan el token y devuelven el usuario.
-/// - `me`               → valida el token guardado y trae el perfil.
-/// - `logout`           → borra el token local.
+/// Implementación local de [AuthRepository] que utiliza [LocalDb] (IndexedDB/SharedPreferences)
+/// en lugar de hacer peticiones HTTP al backend NestJS.
+/// 
+/// Reemplaza las llamadas remotas por operaciones locales rápidas.
 class AuthRepository {
-  AuthRepository(this._dio, this._tokens);
+  AuthRepository(this._db, this._tokens);
 
-  final Dio _dio;
+  final LocalDb _db;
   final TokenStorage _tokens;
+
+  /// Clave del Object Store para usuarios en la base de datos local.
+  static const _storeName = 'usuarios';
+
+  Future<void> _asegurarDb() async {
+    await _db.init();
+  }
 
   Future<AuthUser> register({
     required String nombre,
     required String email,
     required String password,
   }) async {
-    final res = await _dio.post('/auth/register', data: {
-      'nombre': nombre,
-      'email': email,
-      'password': password,
-    });
-    return _procesarAuth(res);
+    await _asegurarDb();
+
+    // Validar si ya existe una cuenta local con ese correo
+    final usuarios = await _db.getAll(_storeName);
+    final existe = usuarios.any(
+      (u) => (u['email'] as String).toLowerCase() == email.trim().toLowerCase(),
+    );
+
+    if (existe) {
+      throw const AuthException('Ya existe una cuenta con ese correo');
+    }
+
+    final id = const Uuid().v4();
+    final nuevoUsuario = {
+      'id': id,
+      'email': email.trim(),
+      'nombre': nombre.trim(),
+      'password': password, // Contraseña local para simulación
+      'carrera': '',
+      'universidad': '',
+      'createdAt': DateTime.now().toIso8601String(),
+    };
+
+    await _db.save(_storeName, id, nuevoUsuario);
+    await _tokens.save(id); // Guardamos el ID del usuario activo como token
+
+    return AuthUser.fromJson(nuevoUsuario);
   }
 
   Future<AuthUser> login({
     required String email,
     required String password,
   }) async {
-    final res = await _dio.post('/auth/login', data: {
-      'email': email,
-      'password': password,
-    });
-    return _procesarAuth(res);
+    await _asegurarDb();
+
+    final usuarios = await _db.getAll(_storeName);
+    final usuario = usuarios.firstWhere(
+      (u) => (u['email'] as String).toLowerCase() == email.trim().toLowerCase(),
+      orElse: () => throw const AuthException('Correo o contraseña incorrectos'),
+    );
+
+    if (usuario['password'] != password) {
+      throw const AuthException('Correo o contraseña incorrectos');
+    }
+
+    final id = usuario['id'] as String;
+    await _tokens.save(id);
+
+    return AuthUser.fromJson(usuario);
   }
 
-  /// Devuelve el usuario si el token guardado sigue siendo válido; si no,
-  /// lanza [AuthException] (el llamador lo trata como "sin sesión").
+  /// Devuelve el usuario activo local si el token (ID de usuario) está guardado.
   Future<AuthUser> me() async {
-    final res = await _dio.get('/auth/me');
-    if (res.statusCode == 200 && res.data != null) {
-      return AuthUser.fromJson(res.data as Map<String, dynamic>);
+    await _asegurarDb();
+    final activeId = await _tokens.read();
+    if (activeId == null || activeId.isEmpty) {
+      throw const AuthException('Sin sesión local activa');
     }
-    throw const AuthException('Sesión expirada');
+
+    final datos = await _db.get(_storeName, activeId);
+    if (datos != null) {
+      return AuthUser.fromJson(datos);
+    }
+
+    await _tokens.clear();
+    throw const AuthException('Usuario local no encontrado');
   }
 
-  Future<void> logout() => _tokens.clear();
-
-  // --- Helpers ---
-
-  /// Extrae `{accessToken, user}`, guarda el token y devuelve el usuario.
-  Future<AuthUser> _procesarAuth(Response res) async {
-    final data = res.data;
-    final ok = res.statusCode == 200 || res.statusCode == 201;
-
-    if (!ok || data is! Map<String, dynamic>) {
-      throw AuthException(_mensajeError(data, res.statusCode));
-    }
-
-    final token = data['accessToken'] as String?;
-    if (token == null) {
-      throw const AuthException('Respuesta inválida del servidor');
-    }
-    await _tokens.save(token);
-    return AuthUser.fromJson(data['user'] as Map<String, dynamic>);
+  Future<void> logout() async {
+    await _tokens.clear();
   }
 
-  /// Traduce el cuerpo de error de NestJS a un mensaje legible.
-  String _mensajeError(dynamic data, int? status) {
-    if (data is Map<String, dynamic>) {
-      final msg = data['message'];
-      if (msg is String) return msg;
-      if (msg is List && msg.isNotEmpty) return msg.first.toString();
+  Future<void> cambiarPassword({
+    required String passwordActual,
+    required String passwordNueva,
+  }) async {
+    await _asegurarDb();
+    final activeId = await _tokens.read();
+    if (activeId == null || activeId.isEmpty) {
+      throw const AuthException('No hay sesión activa');
     }
-    return 'Error del servidor (${status ?? '?'})';
+
+    final datos = await _db.get(_storeName, activeId);
+    if (datos == null) {
+      throw const AuthException('Usuario no encontrado');
+    }
+
+    if (datos['password'] != passwordActual) {
+      throw const AuthException('La contraseña actual es incorrecta');
+    }
+
+    final clone = Map<String, dynamic>.from(datos);
+    clone['password'] = passwordNueva;
+    await _db.save(_storeName, activeId, clone);
   }
 }
 
+final localDbProvider = Provider<LocalDb>((ref) => LocalDbImpl());
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(
-    ref.watch(dioProvider),
+    ref.watch(localDbProvider),
     ref.watch(tokenStorageProvider),
   );
 });
+

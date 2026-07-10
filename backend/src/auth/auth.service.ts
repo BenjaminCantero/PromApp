@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { CambiarPasswordDto } from './dto/cambiar-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
@@ -56,6 +57,17 @@ export class AuthService {
     }
 
     return this.buildResponse(user);
+  }
+
+  async cambiarPassword(userId: string, dto: CambiarPasswordDto): Promise<void> {
+    const user = await this.users.findById(userId);
+    if (!user) throw new UnauthorizedException('Usuario no encontrado');
+
+    const ok = await bcrypt.compare(dto.passwordActual, user.password);
+    if (!ok) throw new UnauthorizedException('La contraseña actual es incorrecta');
+
+    const hash = await bcrypt.hash(dto.passwordNueva, AuthService.SALT_ROUNDS);
+    await this.users.updatePassword(userId, hash);
   }
 
   /** Firma el token y devuelve el usuario sin password. */

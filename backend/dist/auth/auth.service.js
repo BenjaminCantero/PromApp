@@ -81,6 +81,16 @@ let AuthService = class AuthService {
         }
         return this.buildResponse(user);
     }
+    async cambiarPassword(userId, dto) {
+        const user = await this.users.findById(userId);
+        if (!user)
+            throw new common_1.UnauthorizedException('Usuario no encontrado');
+        const ok = await bcrypt.compare(dto.passwordActual, user.password);
+        if (!ok)
+            throw new common_1.UnauthorizedException('La contraseña actual es incorrecta');
+        const hash = await bcrypt.hash(dto.passwordNueva, AuthService_1.SALT_ROUNDS);
+        await this.users.updatePassword(userId, hash);
+    }
     buildResponse(user) {
         const payload = { sub: user.id, email: user.email };
         const accessToken = this.jwt.sign(payload);
