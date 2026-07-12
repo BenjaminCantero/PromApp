@@ -5,12 +5,12 @@ import 'app_colors.dart';
 import 'app_dimensions.dart';
 import 'app_typography.dart';
 
-/// Tema global de PromApp — Diseño Premium Dark.
+/// Tema global claro de PromApp.
 class AppTheme {
   AppTheme._();
 
   static ThemeData get light {
-    final colorScheme = ColorScheme.dark(
+    final colorScheme = ColorScheme.light(
       primary: AppColors.primary,
       onPrimary: AppColors.textOnPrimary,
       secondary: AppColors.accent,
@@ -29,7 +29,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       textTheme: _textTheme,
 
-      // AppBar transparente con overlay de status bar
+      // AppBar transparente
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
@@ -38,7 +38,7 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: AppTypography.h2,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
 
       // Cards elevadas con borde sutil
@@ -61,7 +61,9 @@ class AppTheme {
           vertical: AppDimensions.md,
         ),
         hintStyle: AppTypography.body.copyWith(color: AppColors.textMuted),
-        labelStyle: AppTypography.label.copyWith(color: AppColors.textSecondary),
+        labelStyle: AppTypography.label.copyWith(
+          color: AppColors.textSecondary,
+        ),
         border: _inputBorder(AppColors.border),
         enabledBorder: _inputBorder(AppColors.border),
         focusedBorder: _inputBorder(AppColors.primary, width: 2),
@@ -121,7 +123,9 @@ class AppTheme {
       // Switch con indigo
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return AppColors.textOnPrimary;
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.textOnPrimary;
+          }
           return AppColors.textMuted;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
@@ -174,14 +178,14 @@ class AppTheme {
   }
 
   static TextTheme get _textTheme => TextTheme(
-        displayLarge: AppTypography.display,
-        headlineMedium: AppTypography.h1,
-        titleLarge: AppTypography.h2,
-        titleMedium: AppTypography.h3,
-        bodyLarge: AppTypography.body,
-        bodyMedium: AppTypography.bodySecondary,
-        labelLarge: AppTypography.button,
-        labelMedium: AppTypography.label,
-        labelSmall: AppTypography.caption,
-      );
+    displayLarge: AppTypography.display,
+    headlineMedium: AppTypography.h1,
+    titleLarge: AppTypography.h2,
+    titleMedium: AppTypography.h3,
+    bodyLarge: AppTypography.body,
+    bodyMedium: AppTypography.bodySecondary,
+    labelLarge: AppTypography.button,
+    labelMedium: AppTypography.label,
+    labelSmall: AppTypography.caption,
+  );
 }

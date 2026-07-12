@@ -21,26 +21,25 @@ const _uuid = Uuid();
 /// Borrador editable de una evaluación.
 class _EvalDraft {
   _EvalDraft({String? id, String nombre = '', String pct = '', this.tipo})
-      : id = id ?? _uuid.v4(),
-        nombreCtrl = TextEditingController(text: nombre),
-        pctCtrl = TextEditingController(text: pct);
+    : id = id ?? _uuid.v4(),
+      nombreCtrl = TextEditingController(text: nombre),
+      pctCtrl = TextEditingController(text: pct);
 
   final String id;
   final TextEditingController nombreCtrl;
   final TextEditingController pctCtrl;
   String? tipo;
 
-  double get pct =>
-      double.tryParse(pctCtrl.text.replaceAll(',', '.')) ?? 0;
+  double get pct => double.tryParse(pctCtrl.text.replaceAll(',', '.')) ?? 0;
 
   Evaluacion toEvaluacion(Evaluacion? previa) => Evaluacion(
-        id: id,
-        nombre: nombreCtrl.text.trim(),
-        porcentaje: pct,
-        tipo: tipo,
-        nota: previa?.nota,
-        fecha: previa?.fecha,
-      );
+    id: id,
+    nombre: nombreCtrl.text.trim(),
+    porcentaje: pct,
+    tipo: tipo,
+    nota: previa?.nota,
+    fecha: previa?.fecha,
+  );
 
   void dispose() {
     nombreCtrl.dispose();
@@ -77,8 +76,14 @@ class _AsignaturaConfigScreenState
   bool _guardando = false;
 
   static const _tipos = [
-    'Solemne', 'Control', 'Prueba', 'Tarea',
-    'Proyecto', 'Taller', 'Laboratorio', 'Ensayo',
+    'Solemne',
+    'Control',
+    'Prueba',
+    'Tarea',
+    'Proyecto',
+    'Taller',
+    'Laboratorio',
+    'Ensayo',
   ];
 
   @override
@@ -102,18 +107,19 @@ class _AsignaturaConfigScreenState
     _pesoPresentacion = a.pesoPresentacion;
     _eximirCtrl.text = a.notaEximir?.toString() ?? '';
     for (final e in a.evaluaciones) {
-      _evaluaciones.add(_EvalDraft(
-        id: e.id,
-        nombre: e.nombre,
-        pct: e.porcentaje.toStringAsFixed(0),
-        tipo: e.tipo,
-      ));
+      _evaluaciones.add(
+        _EvalDraft(
+          id: e.id,
+          nombre: e.nombre,
+          pct: e.porcentaje.toStringAsFixed(0),
+          tipo: e.tipo,
+        ),
+      );
     }
     _inicializado = true;
   }
 
-  double get _sumaPct =>
-      _evaluaciones.fold<double>(0, (acc, e) => acc + e.pct);
+  double get _sumaPct => _evaluaciones.fold<double>(0, (acc, e) => acc + e.pct);
 
   void _agregarEvaluacion() {
     setState(() => _evaluaciones.add(_EvalDraft()));
@@ -155,8 +161,7 @@ class _AsignaturaConfigScreenState
     final asignatura = Asignatura(
       id: widget.asignaturaId ?? _uuid.v4(),
       nombre: nombre,
-      codigo:
-          _codigoCtrl.text.trim().isEmpty ? null : _codigoCtrl.text.trim(),
+      codigo: _codigoCtrl.text.trim().isEmpty ? null : _codigoCtrl.text.trim(),
       semestre: _semestreCtrl.text.trim().isEmpty
           ? null
           : _semestreCtrl.text.trim(),
@@ -228,9 +233,7 @@ class _AsignaturaConfigScreenState
           // Encabezado
           SliverToBoxAdapter(
             child: Container(
-              decoration: const BoxDecoration(
-                gradient: AppColors.heroGradient,
-              ),
+              decoration: const BoxDecoration(gradient: AppColors.heroGradient),
               padding: EdgeInsets.fromLTRB(
                 AppDimensions.screenPadding,
                 topPad + AppDimensions.sm,
@@ -245,7 +248,9 @@ class _AsignaturaConfigScreenState
                     color: AppColors.textOnDark,
                     onPressed: () => Navigator.of(context).pop(),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.textOnDark.withValues(
+                        alpha: 0.1,
+                      ),
                       padding: const EdgeInsets.all(AppDimensions.sm),
                     ),
                   ),
@@ -418,8 +423,7 @@ class _AsignaturaConfigScreenState
                           style: AppTypography.body,
                         ),
                         value: _tieneExamen,
-                        onChanged: (v) =>
-                            setState(() => _tieneExamen = v),
+                        onChanged: (v) => setState(() => _tieneExamen = v),
                       ),
                       if (_tieneExamen) ...[
                         const SizedBox(height: AppDimensions.sm),
@@ -429,8 +433,10 @@ class _AsignaturaConfigScreenState
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Presentación',
-                                    style: AppTypography.caption),
+                                Text(
+                                  'Presentación',
+                                  style: AppTypography.caption,
+                                ),
                                 Text(
                                   '${(_pesoPresentacion * 100).toStringAsFixed(0)}%',
                                   style: AppTypography.h3.copyWith(
@@ -442,8 +448,7 @@ class _AsignaturaConfigScreenState
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text('Examen',
-                                    style: AppTypography.caption),
+                                Text('Examen', style: AppTypography.caption),
                                 Text(
                                   '${((1 - _pesoPresentacion) * 100).toStringAsFixed(0)}%',
                                   style: AppTypography.h3.copyWith(
@@ -486,8 +491,9 @@ class _AsignaturaConfigScreenState
                       height: AppDimensions.buttonHeight,
                       decoration: BoxDecoration(
                         gradient: AppColors.primaryGradient,
-                        borderRadius:
-                            BorderRadius.circular(AppDimensions.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusMd,
+                        ),
                         boxShadow: AppColors.primaryGlow,
                       ),
                       child: Center(
@@ -602,10 +608,7 @@ class _Campo extends StatelessWidget {
               ? const TextInputType.numberWithOptions(decimal: true)
               : TextInputType.text,
           style: AppTypography.body.copyWith(color: AppColors.textPrimary),
-          decoration: InputDecoration(
-            hintText: hint,
-            isDense: true,
-          ),
+          decoration: InputDecoration(hintText: hint, isDense: true),
         ),
       ],
     );
@@ -659,31 +662,51 @@ class _FilaEvalEditable extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  width: 70,
+                  width: 96,
                   margin: const EdgeInsets.symmetric(
                     horizontal: AppDimensions.sm,
                   ),
                   child: TextField(
                     controller: draft.pctCtrl,
                     onChanged: (_) => onChanged(),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                     ],
                     textAlign: TextAlign.center,
                     style: AppTypography.bodyBold.copyWith(
-                      color: AppColors.primary,
+                      color: AppColors.textPrimary,
                     ),
-                    decoration: const InputDecoration(
+                    cursorColor: AppColors.primary,
+                    decoration: InputDecoration(
                       hintText: '0',
                       suffixText: '%',
+                      suffixStyle: AppTypography.bodyBold.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                       isDense: true,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      fillColor: Colors.transparent,
-                      filled: false,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppDimensions.sm,
+                        vertical: AppDimensions.sm,
+                      ),
+                      fillColor: AppColors.surfaceElevated,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusSm,
+                        ),
+                        borderSide: const BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusSm,
+                        ),
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -693,8 +716,9 @@ class _FilaEvalEditable extends StatelessWidget {
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: AppColors.reprobado.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusSm,
+                      ),
                     ),
                     child: Icon(
                       Icons.close_rounded,

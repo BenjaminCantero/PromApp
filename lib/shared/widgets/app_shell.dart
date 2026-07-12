@@ -22,19 +22,19 @@ class _AppShellState extends State<AppShell>
     with SingleTickerProviderStateMixin {
   static const _items = [
     NavItem(
+      icon: Icons.calculate_outlined,
+      activeIcon: Icons.calculate_rounded,
+      label: 'Calculadora',
+    ),
+    NavItem(
       icon: Icons.home_outlined,
       activeIcon: Icons.home_rounded,
-      label: 'Inicio',
+      label: 'Resumen',
     ),
     NavItem(
       icon: Icons.menu_book_outlined,
       activeIcon: Icons.menu_book_rounded,
       label: 'Ramos',
-    ),
-    NavItem(
-      icon: Icons.calculate_outlined,
-      activeIcon: Icons.calculate_rounded,
-      label: 'Calcular',
     ),
   ];
 
@@ -75,10 +75,7 @@ class _AppShellState extends State<AppShell>
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
-      body: FadeTransition(
-        opacity: _fadeCtrl,
-        child: widget.navigationShell,
-      ),
+      body: FadeTransition(opacity: _fadeCtrl, child: widget.navigationShell),
       bottomNavigationBar: AppBottomNav(
         items: _items,
         currentIndex: widget.navigationShell.currentIndex,

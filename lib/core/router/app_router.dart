@@ -7,14 +7,14 @@ import '../../features/asignaturas/presentation/asignatura_detalle_screen.dart';
 import '../../features/asignaturas/presentation/asignaturas_screen.dart';
 import '../../features/auth/presentation/perfil_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
-import '../../features/herramientas/presentation/herramientas_screen.dart';
+import '../../features/herramientas/presentation/calculadora_libre_screen.dart';
 import '../../shared/widgets/app_shell.dart';
 
 /// Rutas de la app.
 abstract class AppRoutes {
   static const dashboard = '/';
   static const asignaturas = '/asignaturas';
-  static const herramientas = '/herramientas';
+  static const resumen = '/resumen';
 
   // Full-screen (sobre el shell)
   static const asignaturaNueva = '/asignatura/nueva';
@@ -43,63 +43,64 @@ GoRouter _crearRouter() {
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.dashboard,
     routes: [
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) =>
-          AppShell(navigationShell: navigationShell),
-      branches: [
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.dashboard,
-              builder: (context, state) => const DashboardScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.asignaturas,
-              builder: (context, state) => const AsignaturasScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: AppRoutes.herramientas,
-              builder: (context, state) => const HerramientasScreen(),
-            ),
-          ],
-        ),
-      ],
-    ),
-
-    // --- Full-screen ---
-    GoRoute(
-      path: AppRoutes.asignaturaNueva,
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const AsignaturaConfigScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.perfil,
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const PerfilScreen(),
-    ),
-    GoRoute(
-      path: '/asignatura/:id',
-      parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) =>
-          AsignaturaDetalleScreen(asignaturaId: state.pathParameters['id']!),
-      routes: [
-        GoRoute(
-          path: 'editar',
-          parentNavigatorKey: rootNavigatorKey,
-          builder: (context, state) => AsignaturaConfigScreen(
-            asignaturaId: state.pathParameters['id'],
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.dashboard,
+                builder: (context, state) =>
+                    const CalculadoraLibreScreen(showBackButton: false),
+              ),
+            ],
           ),
-        ),
-      ],
-    ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.resumen,
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.asignaturas,
+                builder: (context, state) => const AsignaturasScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // --- Full-screen ---
+      GoRoute(
+        path: AppRoutes.asignaturaNueva,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AsignaturaConfigScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.perfil,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const PerfilScreen(),
+      ),
+      GoRoute(
+        path: '/asignatura/:id',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) =>
+            AsignaturaDetalleScreen(asignaturaId: state.pathParameters['id']!),
+        routes: [
+          GoRoute(
+            path: 'editar',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => AsignaturaConfigScreen(
+              asignaturaId: state.pathParameters['id'],
+            ),
+          ),
+        ],
+      ),
     ],
   );
 }

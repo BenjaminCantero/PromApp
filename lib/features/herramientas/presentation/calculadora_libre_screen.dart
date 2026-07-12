@@ -7,11 +7,15 @@ import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../calculos/domain/calculo_service.dart';
 import '../../dashboard/presentation/widgets/promedio_donut.dart';
+import 'herramientas_screen.dart';
 
 /// Calculadora libre de notas — sin guardar ramo ni progreso.
 /// El usuario agrega notas + ponderaciones y ve el promedio en tiempo real.
 class CalculadoraLibreScreen extends StatefulWidget {
-  const CalculadoraLibreScreen({super.key});
+  const CalculadoraLibreScreen({super.key, this.showBackButton = true});
+
+  /// La pantalla principal vive dentro del shell y no necesita volver atrás.
+  final bool showBackButton;
 
   @override
   State<CalculadoraLibreScreen> createState() => _CalculadoraLibreScreenState();
@@ -152,25 +156,27 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
               ),
               child: Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: AppColors.textOnDark,
-                      size: 20,
-                    ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.textOnDark.withValues(
-                        alpha: 0.1,
+                  if (widget.showBackButton) ...[
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: AppColors.textOnDark,
+                        size: 20,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.radiusSm,
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.textOnDark.withValues(
+                          alpha: 0.1,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppDimensions.radiusSm,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppDimensions.md),
+                    const SizedBox(width: AppDimensions.md),
+                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,6 +237,10 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // El simulador pertenece al mismo apartado de Calculadora.
+                _AccesoSimuladorExamen(),
+                const SizedBox(height: AppDimensions.xl),
+
                 // --- Resultado principal ---
                 ScaleTransition(
                   scale: Tween<double>(
@@ -426,6 +436,55 @@ class _CalculadoraLibreScreenState extends State<CalculadoraLibreScreen>
   }
 }
 
+class _AccesoSimuladorExamen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      padding: const EdgeInsets.all(AppDimensions.lg),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const HerramientasScreen(showBackButton: true),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppDimensions.md),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+            ),
+            child: const Icon(
+              Icons.school_rounded,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: AppDimensions.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Simulador de examen', style: AppTypography.h3),
+                const SizedBox(height: 4),
+                Text(
+                  'Calcula qué nota necesitas y si puedes eximirte.',
+                  style: AppTypography.bodySecondary,
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 15,
+            color: AppColors.textSecondary,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
 // Modelo de una fila de nota
 // ─────────────────────────────────────────────────────────────
@@ -481,7 +540,7 @@ class _Resultado {
   Color _colorPara(double n) {
     final oficial = CalculoService.promedioOficial(n);
     if (oficial >= 5.5) return AppColors.aprobado;
-    if (oficial >= 4.0) return const Color(0xFF34D399);
+    if (oficial >= 4.0) return AppColors.aprobado;
     if (oficial >= 3.5) return AppColors.examen;
     return AppColors.reprobado;
   }

@@ -7,7 +7,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
 
-
 const _kOnboardingKey = 'onboarding_done';
 
 /// Verifica si el onboarding ya fue completado.
@@ -67,7 +66,7 @@ const _slides = [
     gradiente: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+      colors: [AppColors.gray700, AppColors.gray500],
     ),
     detalle: [
       '🎯  Ingresa tu nota de presentación',
@@ -84,7 +83,7 @@ const _slides = [
     gradiente: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color(0xFF059669), Color(0xFF10B981)],
+      colors: [AppColors.gray900, AppColors.gray700],
     ),
     detalle: [
       '➕  Agrega tantas notas como necesites',
@@ -224,7 +223,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           ),
                           child: const Icon(
                             Icons.school_rounded,
-                            color: Colors.white,
+                            color: AppColors.textOnDark,
                             size: 18,
                           ),
                         ),
@@ -356,7 +355,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                     ? 'Comenzar'
                                     : 'Siguiente',
                                 style: AppTypography.button.copyWith(
-                                  color: Colors.white,
+                                  color: AppColors.textOnDark,
                                 ),
                               ),
                               const SizedBox(width: AppDimensions.sm),
@@ -365,7 +364,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                     ? Icons.check_rounded
                                     : Icons.arrow_forward_rounded,
                                 size: 18,
-                                color: Colors.white,
+                                color: AppColors.textOnDark,
                               ),
                             ],
                           ),
@@ -449,7 +448,7 @@ class _SlideWidgetState extends State<_SlideWidget>
                     ),
                   ],
                 ),
-                child: Icon(s.icon, size: 56, color: Colors.white),
+                child: Icon(s.icon, size: 56, color: AppColors.textOnDark),
               ),
             ),
           ),

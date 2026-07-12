@@ -396,8 +396,8 @@ class _ProximasEvaluacionesCard extends StatelessWidget {
     (AppColors.accentRed, AppColors.badgeRedBg),
     (AppColors.accentBlue, AppColors.badgeBlueBg),
     (AppColors.accentPurple, AppColors.badgePurpleBg),
-    (AppColors.accentTeal, Color(0x2214B8A6)),
-    (AppColors.accentAmber, Color(0x22F59E0B)),
+    (AppColors.accentTeal, AppColors.badgeBlueBg),
+    (AppColors.accentAmber, AppColors.badgePurpleBg),
   ];
 
   @override

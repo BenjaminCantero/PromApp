@@ -6,14 +6,19 @@ import 'helpers/auth_test_helper.dart';
 
 void main() {
   mockOnboardingVisto();
-  testWidgets('La app arranca en el Dashboard', (WidgetTester tester) async {
+  testWidgets('La app arranca en la Calculadora Libre', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-        ProviderScope(overrides: testOverrides, child: const PromApp()));
+      ProviderScope(overrides: testOverrides, child: const PromApp()),
+    );
     await tester.pumpAndSettle();
 
-    // El dashboard muestra su sección principal.
+    expect(find.text('Cálculo Libre'), findsOneWidget);
+    expect(find.text('Calculadora'), findsOneWidget);
+
+    await tester.tap(find.text('Resumen'));
+    await tester.pumpAndSettle();
     expect(find.text('Mi Rendimiento'), findsOneWidget);
-    // El bottom nav muestra la tab activa "Inicio".
-    expect(find.text('Inicio'), findsOneWidget);
   });
 }

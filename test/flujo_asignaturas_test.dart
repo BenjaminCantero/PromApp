@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:promapp/app.dart';
+import 'package:promapp/core/theme/app_colors.dart';
 
 import 'helpers/auth_test_helper.dart';
 
 void main() {
   mockOnboardingVisto();
 
-  testWidgets('Navega a la lista y abre el detalle de una asignatura',
-      (tester) async {
-    await tester.pumpWidget(ProviderScope(overrides: testOverrides, child: const PromApp()));
+  testWidgets('Navega a la lista y abre el detalle de una asignatura', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(overrides: testOverrides, child: const PromApp()),
+    );
     await tester.pumpAndSettle();
 
     // Ir a la tab "Ramos" (label del bottom nav).
@@ -34,7 +38,9 @@ void main() {
   });
 
   testWidgets('Abre el formulario de Nueva Asignatura', (tester) async {
-    await tester.pumpWidget(ProviderScope(overrides: testOverrides, child: const PromApp()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: testOverrides, child: const PromApp()),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Ramos'));
@@ -49,5 +55,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Información General'), findsOneWidget);
     expect(find.text('Nombre del ramo *'), findsOneWidget);
+  });
+
+  testWidgets('Mantiene visible el porcentaje al crear una evaluación', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(overrides: testOverrides, child: const PromApp()),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Ramos'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nuevo'));
+    await tester.pumpAndSettle();
+
+    final agregar = find.text('Añadir evaluación');
+    await tester.scrollUntilVisible(
+      agregar,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -160));
+    await tester.pumpAndSettle();
+    await tester.tap(agregar);
+    await tester.pumpAndSettle();
+
+    final porcentaje = find.byWidgetPredicate(
+      (widget) => widget is TextField && widget.decoration?.hintText == '0',
+    );
+    expect(porcentaje, findsOneWidget);
+    await tester.enterText(porcentaje, '25');
+    await tester.pump();
+
+    final campo = tester.widget<TextField>(porcentaje);
+    expect(campo.controller?.text, '25');
+    expect(campo.style?.color, isNot(AppColors.surfaceElevated));
   });
 }

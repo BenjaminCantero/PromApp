@@ -32,12 +32,13 @@ class PromedioDonut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (progreso.clamp(0, 1) * 100).toDouble();
-    final textColor =
-        lightMode ? AppColors.textOnDark : AppColors.textPrimary;
-    final subtitleColor =
-        lightMode ? AppColors.textOnDark.withValues(alpha: 0.6) : AppColors.textSecondary;
-    final trackColor =
-        lightMode ? Colors.white.withValues(alpha: 0.15) : AppColors.border;
+    final textColor = lightMode ? AppColors.textOnDark : AppColors.textPrimary;
+    final subtitleColor = lightMode
+        ? AppColors.textOnDark.withValues(alpha: 0.6)
+        : AppColors.textSecondary;
+    final trackColor = lightMode
+        ? AppColors.textOnDark.withValues(alpha: 0.15)
+        : AppColors.border;
 
     // Gradiente como arco de colores en el pie chart
     final gradientColor = color;

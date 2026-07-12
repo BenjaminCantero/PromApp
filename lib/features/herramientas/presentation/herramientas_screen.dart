@@ -8,11 +8,12 @@ import '../../../core/theme/app_typography.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../calculos/domain/calculo_service.dart';
 import '../../dashboard/presentation/widgets/promedio_donut.dart';
-import 'calculadora_libre_screen.dart';
 
-/// Tab 3: Simulador de Examen — Diseño Premium Dark.
+/// Simulador de examen, accesible desde el apartado Calculadora.
 class HerramientasScreen extends StatefulWidget {
-  const HerramientasScreen({super.key});
+  const HerramientasScreen({super.key, this.showBackButton = false});
+
+  final bool showBackButton;
 
   @override
   State<HerramientasScreen> createState() => _HerramientasScreenState();
@@ -22,8 +23,9 @@ class _HerramientasScreenState extends State<HerramientasScreen> {
   final _presentacionCtrl = TextEditingController();
   final _pctExamenCtrl = TextEditingController();
   final _eximirCtrl = TextEditingController();
-  final _aprobacionCtrl =
-      TextEditingController(text: AppConstants.notaAprobacion.toStringAsFixed(1));
+  final _aprobacionCtrl = TextEditingController(
+    text: AppConstants.notaAprobacion.toStringAsFixed(1),
+  );
 
   @override
   void dispose() {
@@ -44,8 +46,7 @@ class _HerramientasScreenState extends State<HerramientasScreen> {
     final presentacion = _parse(_presentacionCtrl);
     final pctExamen = _parse(_pctExamenCtrl);
     final eximir = _parse(_eximirCtrl);
-    final aprobacion =
-        _parse(_aprobacionCtrl) ?? AppConstants.notaAprobacion;
+    final aprobacion = _parse(_aprobacionCtrl) ?? AppConstants.notaAprobacion;
 
     final sim = _simular(
       presentacion: presentacion,
@@ -63,34 +64,54 @@ class _HerramientasScreenState extends State<HerramientasScreen> {
           // Header
           SliverToBoxAdapter(
             child: Container(
-              decoration: const BoxDecoration(
-                gradient: AppColors.heroGradient,
-              ),
+              decoration: const BoxDecoration(gradient: AppColors.heroGradient),
               padding: EdgeInsets.fromLTRB(
                 AppDimensions.screenPadding,
                 topPad + AppDimensions.lg,
                 AppDimensions.screenPadding,
                 AppDimensions.xxl,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    'HERRAMIENTAS',
-                    style: AppTypography.captionUppercase,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Simulador',
-                    style: AppTypography.h1.copyWith(
-                      color: AppColors.textOnDark,
+                  if (widget.showBackButton) ...[
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: AppColors.textOnDark,
+                        size: 20,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.textOnDark.withValues(
+                          alpha: 0.1,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Calcula qué necesitas en el examen y si puedes eximirte.',
-                    style: AppTypography.bodySecondary.copyWith(
-                      color: AppColors.textOnDark.withValues(alpha: 0.6),
+                    const SizedBox(width: AppDimensions.md),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CALCULADORA',
+                          style: AppTypography.captionUppercase,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Simulador de examen',
+                          style: AppTypography.h1.copyWith(
+                            color: AppColors.textOnDark,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Calcula qué necesitas y si puedes eximirte.',
+                          style: AppTypography.bodySecondary.copyWith(
+                            color: AppColors.textOnDark.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -108,10 +129,6 @@ class _HerramientasScreenState extends State<HerramientasScreen> {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // ── Acceso rápido: Calculadora Libre ──
-                _AccesoCalculadoraLibre(),
-                const SizedBox(height: AppDimensions.xl),
-
                 // Card de resultado principal
                 _ResultadoPrincipal(sim: sim),
                 const SizedBox(height: AppDimensions.xl),
@@ -256,10 +273,10 @@ class _Simulacion {
   }) : esperando = false;
 
   const _Simulacion.esperando()
-      : eximido = false,
-        notaExamenNecesaria = null,
-        distanciaEximicion = null,
-        esperando = true;
+    : eximido = false,
+      notaExamenNecesaria = null,
+      distanciaEximicion = null,
+      esperando = true;
 
   final bool esperando;
   final bool eximido;
@@ -356,10 +373,7 @@ class _ResultadoPrincipal extends StatelessWidget {
                   style: AppTypography.h3.copyWith(color: sim.colorEstado),
                 ),
                 const SizedBox(height: AppDimensions.sm),
-                Text(
-                  sim.subtituloEstado,
-                  style: AppTypography.bodySecondary,
-                ),
+                Text(sim.subtituloEstado, style: AppTypography.bodySecondary),
                 if (!sim.esperando && !sim.eximido) ...[
                   const SizedBox(height: AppDimensions.md),
                   Container(
@@ -369,8 +383,9 @@ class _ResultadoPrincipal extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: sim.colorEstado.withValues(alpha: 0.15),
-                      borderRadius:
-                          BorderRadius.circular(AppDimensions.radiusPill),
+                      borderRadius: BorderRadius.circular(
+                        AppDimensions.radiusPill,
+                      ),
                     ),
                     child: Text(
                       sim.eximido ? '✓ Eximido' : 'Debe rendir examen',
@@ -420,10 +435,7 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: AppDimensions.md),
           Text(titulo, style: AppTypography.caption),
           const SizedBox(height: 4),
-          Text(
-            valor,
-            style: AppTypography.h2.copyWith(color: color),
-          ),
+          Text(valor, style: AppTypography.h2.copyWith(color: color)),
         ],
       ),
     );
@@ -470,80 +482,6 @@ class _InputNota extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// Acceso rápido a Calculadora Libre
-// ─────────────────────────────────────────────────────────────
-
-class _AccesoCalculadoraLibre extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return AppCard(
-      padding: EdgeInsets.zero,
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF1E1B4B), Color(0xFF2D1B69)],
-      ),
-      border: false,
-      glowColor: AppColors.primary,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const CalculadoraLibreScreen(),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.lg),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppDimensions.md),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.35),
-                ),
-              ),
-              child: const Icon(
-                Icons.calculate_rounded,
-                color: AppColors.primaryLight,
-                size: 26,
-              ),
-            ),
-            const SizedBox(width: AppDimensions.lg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Calculadora Libre',
-                    style: AppTypography.h3.copyWith(
-                      color: AppColors.textOnDark,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Calcula cualquier promedio sin guardar nada. Solo ingresa notas y ponderaciones.',
-                    style: AppTypography.bodySecondary.copyWith(
-                      color: AppColors.textOnDark.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppDimensions.sm),
-            const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 14,
-              color: AppColors.primaryLight,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

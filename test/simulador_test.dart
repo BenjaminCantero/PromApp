@@ -7,7 +7,8 @@ import 'helpers/auth_test_helper.dart';
 
 void main() {
   mockOnboardingVisto();
-  /// Abre la tab "Calcular" y deja visibles los campos de entrada.
+
+  /// Abre el simulador desde el apartado principal de Calculadora.
   ///
   /// En la pantalla, las tarjetas de resultado van ARRIBA y los campos de
   /// "Parámetros de Evaluación" más abajo (SliverList lazy) → hay que bajar.
@@ -16,7 +17,7 @@ void main() {
       ProviderScope(overrides: testOverrides, child: const PromApp()),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Calcular'));
+    await tester.tap(find.text('Simulador de examen'));
     await tester.pumpAndSettle();
 
     await tester.dragFrom(const Offset(400, 150), const Offset(0, -400));
@@ -29,8 +30,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('El simulador calcula la nota mínima de examen en vivo',
-      (tester) async {
+  testWidgets('El simulador calcula la nota mínima de examen en vivo', (
+    tester,
+  ) async {
     await abrirSimulador(tester);
 
     // Presentación 5.0, examen 40% → objetivo 4.0.
@@ -44,8 +46,9 @@ void main() {
     expect(find.text('2.5'), findsWidgets);
   });
 
-  testWidgets('Detecta eximición cuando la presentación la supera',
-      (tester) async {
+  testWidgets('Detecta eximición cuando la presentación la supera', (
+    tester,
+  ) async {
     await abrirSimulador(tester);
 
     await tester.enterText(find.byType(TextField).at(0), '6.0'); // presentación

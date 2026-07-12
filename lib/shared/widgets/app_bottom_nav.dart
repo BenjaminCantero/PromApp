@@ -8,7 +8,11 @@ import '../../core/theme/app_typography.dart';
 
 /// Item de navegación de la barra inferior.
 class NavItem {
-  const NavItem({required this.icon, required this.activeIcon, required this.label});
+  const NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
   final IconData icon;
   final IconData activeIcon;
   final String label;
@@ -46,18 +50,15 @@ class AppBottomNav extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.surfaceElevated.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
-              border: Border.all(
-                color: AppColors.borderLight,
-                width: 1,
-              ),
+              border: Border.all(color: AppColors.borderLight, width: 1),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x800F0E1A),
+                  color: Color(0x33242321),
                   blurRadius: 32,
                   offset: Offset(0, 8),
                 ),
                 BoxShadow(
-                  color: Color(0x206366F1),
+                  color: Color(0x2080766D),
                   blurRadius: 16,
                   offset: Offset(0, 0),
                 ),
@@ -123,9 +124,7 @@ class _NavButton extends StatelessWidget {
               child: Icon(
                 selected ? item.activeIcon : item.icon,
                 size: 20,
-                color: selected
-                    ? AppColors.textOnPrimary
-                    : AppColors.textMuted,
+                color: selected ? AppColors.textOnPrimary : AppColors.textMuted,
               ),
             ),
             const SizedBox(height: 3),

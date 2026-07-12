@@ -224,7 +224,7 @@ class _DetalleHeader extends StatelessWidget {
                 color: AppColors.textOnDark,
                 onPressed: () => Navigator.of(context).pop(),
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.1),
+                  backgroundColor: AppColors.textOnDark.withValues(alpha: 0.1),
                   padding: const EdgeInsets.all(AppDimensions.sm),
                 ),
               ),
