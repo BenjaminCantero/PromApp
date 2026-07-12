@@ -1,0 +1,6 @@
+# Copia este archivo como android/key.properties y completa los valores.
+# No compartas ni subas key.properties o upload-keystore.jks al repositorio.
+storePassword=CAMBIAR
+keyPassword=CAMBIAR
+keyAlias=promapp-upload
+storeFile=upload-keystore.jks

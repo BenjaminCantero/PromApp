@@ -1,3 +1,6 @@
+// TODO(promapp): migrar de dart:html a package:web.
+// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
@@ -32,11 +35,10 @@ class LocalDbImpl implements LocalDb {
       completer.complete();
     });
 
-
-
-
     openRequest.onError.listen((event) {
-      completer.completeError('No se pudo inicializar IndexedDB en el navegador');
+      completer.completeError(
+        'No se pudo inicializar IndexedDB en el navegador',
+      );
     });
 
     await completer.future;
@@ -73,16 +75,20 @@ class LocalDbImpl implements LocalDb {
   }
 
   @override
-  Future<void> save(String storeName, String id, Map<String, dynamic> data) async {
+  Future<void> save(
+    String storeName,
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final db = _db;
     if (db == null) throw Exception('Base de datos no inicializada');
-    
+
     final txn = db.transaction(storeName, 'readwrite');
     final store = txn.objectStore(storeName);
-    
+
     final clone = Map<String, dynamic>.from(data);
     clone['id'] = id;
-    
+
     store.put(clone);
     await txn.completed;
   }

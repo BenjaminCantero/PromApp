@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -459,7 +458,8 @@ class _SlideWidgetState extends State<_SlideWidget>
             opacity: _fade,
             child: Text(
               s.titulo,
-              style: GoogleFonts.spaceGrotesk(
+              style: const TextStyle(
+                fontFamily: AppTypography.headingFont,
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,

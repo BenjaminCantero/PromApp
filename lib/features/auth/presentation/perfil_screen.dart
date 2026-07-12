@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimensions.dart';
 import '../../../core/theme/app_typography.dart';
@@ -66,6 +68,28 @@ class PerfilScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppDimensions.xl),
+
+          Text('INFORMACIÓN', style: AppTypography.captionUppercase),
+          const SizedBox(height: AppDimensions.md),
+          AppCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.lg,
+              vertical: AppDimensions.xs,
+            ),
+            child: Column(
+              children: [
+                _BotonAccionData(
+                  icon: Icons.privacy_tip_outlined,
+                  label: 'Privacidad',
+                  sublabel: 'Cómo se almacenan y protegen tus datos',
+                  onTap: () => context.push(AppRoutes.privacidad),
+                ),
+                const _Sep(),
+                const _InfoVersion(),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppDimensions.xl),
         ],
       ),
     );
@@ -75,11 +99,13 @@ class PerfilScreen extends ConsumerWidget {
     try {
       final manager = BackupManager(ref.read(localDbProvider));
       await manager.exportarRespaldo();
-      
+
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Respaldo exportado correctamente (si estás en móvil/escritorio, se copió al portapapeles)'),
+          content: Text(
+            'Respaldo exportado correctamente (si estás en móvil/escritorio, se copió al portapapeles)',
+          ),
           backgroundColor: AppColors.aprobado,
         ),
       );
@@ -132,7 +158,10 @@ class PerfilScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _confirmarBorradoCompleto(BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmarBorradoCompleto(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -145,14 +174,18 @@ class PerfilScreen extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Cancelar',
-              style: AppTypography.bodyBold.copyWith(color: AppColors.textSecondary),
+              style: AppTypography.bodyBold.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               'Eliminar definitivamente',
-              style: AppTypography.bodyBold.copyWith(color: AppColors.reprobado),
+              style: AppTypography.bodyBold.copyWith(
+                color: AppColors.reprobado,
+              ),
             ),
           ),
         ],
@@ -207,7 +240,14 @@ class _BotonAccionData extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: AppTypography.bodyBold.copyWith(color: color == AppColors.reprobado ? AppColors.reprobado : null)),
+                  Text(
+                    label,
+                    style: AppTypography.bodyBold.copyWith(
+                      color: color == AppColors.reprobado
+                          ? AppColors.reprobado
+                          : null,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Text(sublabel, style: AppTypography.caption),
                 ],
@@ -245,13 +285,24 @@ class _Encabezado extends StatelessWidget {
             boxShadow: AppColors.primaryGlow,
           ),
           child: Center(
-            child: Icon(Icons.settings_rounded, size: 40, color: AppColors.textOnDark),
+            child: Icon(
+              Icons.settings_rounded,
+              size: 40,
+              color: AppColors.textOnDark,
+            ),
           ),
         ),
         const SizedBox(height: AppDimensions.lg),
-        Text('Configuración', style: AppTypography.h2, textAlign: TextAlign.center),
+        Text(
+          'Configuración',
+          style: AppTypography.h2,
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: 2),
-        Text('Administra tus datos locales', style: AppTypography.bodySecondary),
+        Text(
+          'Administra tus datos locales',
+          style: AppTypography.bodySecondary,
+        ),
       ],
     );
   }
@@ -262,4 +313,27 @@ class _Sep extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Divider(color: AppColors.border, height: 1);
+}
+
+class _InfoVersion extends StatelessWidget {
+  const _InfoVersion();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppDimensions.md),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.info_outline_rounded,
+            size: 18,
+            color: AppColors.textMuted,
+          ),
+          const SizedBox(width: AppDimensions.md),
+          const Expanded(child: Text('PromApp')),
+          Text('Versión 1.0.0', style: AppTypography.caption),
+        ],
+      ),
+    );
+  }
 }

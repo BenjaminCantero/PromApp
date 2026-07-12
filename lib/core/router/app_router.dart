@@ -6,6 +6,7 @@ import '../../features/asignaturas/presentation/asignatura_config_screen.dart';
 import '../../features/asignaturas/presentation/asignatura_detalle_screen.dart';
 import '../../features/asignaturas/presentation/asignaturas_screen.dart';
 import '../../features/auth/presentation/perfil_screen.dart';
+import '../../features/auth/presentation/privacidad_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/herramientas/presentation/calculadora_libre_screen.dart';
 import '../../shared/widgets/app_shell.dart';
@@ -19,6 +20,7 @@ abstract class AppRoutes {
   // Full-screen (sobre el shell)
   static const asignaturaNueva = '/asignatura/nueva';
   static const perfil = '/perfil';
+  static const privacidad = '/privacidad';
   static String asignaturaDetalle(String id) => '/asignatura/$id';
   static String asignaturaEditar(String id) => '/asignatura/$id/editar';
 }
@@ -85,6 +87,11 @@ GoRouter _crearRouter() {
         path: AppRoutes.perfil,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const PerfilScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacidad,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const PrivacidadScreen(),
       ),
       GoRoute(
         path: '/asignatura/:id',

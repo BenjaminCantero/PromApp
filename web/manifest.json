@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#242321",
     "theme_color": "#242321",
-    "description": "A new Flutter project.",
+    "description": "Calculadora de promedios y seguimiento académico para estudiantes.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
