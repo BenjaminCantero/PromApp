@@ -64,6 +64,8 @@ class _DashboardBody extends StatelessWidget {
             delegate: SliverChildListDelegate([
               const _AccionesRow(),
               const SizedBox(height: AppDimensions.xxl),
+              _ObjetivosCard(objetivos: data.objetivos),
+              const SizedBox(height: AppDimensions.xxl),
               _ProximasEvaluacionesCard(items: data.proximasEvaluaciones),
               const SizedBox(height: AppDimensions.xxl),
               _RendimientoCard(rendimientos: data.rendimientos),
@@ -72,6 +74,196 @@ class _DashboardBody extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _ObjetivosCard extends StatelessWidget {
+  const _ObjetivosCard({required this.objetivos});
+
+  final List<ObjetivoAsignatura> objetivos;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('MODO OBJETIVO', style: AppTypography.captionUppercase),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.sm,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
+              ),
+              child: Text(
+                'META 4.0',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppDimensions.sm),
+        Text(_mensajeGeneral, style: AppTypography.bodySecondary),
+        const SizedBox(height: AppDimensions.md),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: objetivos.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(AppDimensions.xl),
+                  child: Center(
+                    child: Text(
+                      'Agrega un ramo para comenzar tu objetivo.',
+                      style: AppTypography.bodySecondary,
+                    ),
+                  ),
+                )
+              : Column(
+                  children: [
+                    for (var i = 0; i < objetivos.length; i++) ...[
+                      _ObjetivoTile(objetivo: objetivos[i]),
+                      if (i < objetivos.length - 1) const Divider(height: 1),
+                    ],
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+
+  String get _mensajeGeneral {
+    if (objetivos.isEmpty) {
+      return 'Te mostraremos qué notas necesitas para aprobar.';
+    }
+    final enRiesgo = objetivos.where((o) => o.imposible).length;
+    final encaminados = objetivos
+        .where((o) => o.asegurado || (o.completado && o.aprobado))
+        .length;
+    if (enRiesgo > 0) {
+      return 'Atención: $enRiesgo ${enRiesgo == 1 ? 'ramo necesita' : 'ramos necesitan'} un plan de recuperación.';
+    }
+    if (encaminados == objetivos.length) {
+      return 'Vas muy bien: todas tus metas están encaminadas.';
+    }
+    return 'Estas son las notas promedio que necesitas en lo pendiente.';
+  }
+}
+
+class _ObjetivoTile extends StatelessWidget {
+  const _ObjetivoTile({required this.objetivo});
+
+  final ObjetivoAsignatura objetivo;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _color;
+    return InkWell(
+      onTap: () =>
+          context.push(AppRoutes.asignaturaDetalle(objetivo.asignatura.id)),
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.lg),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              ),
+              child: Icon(_icono, color: color, size: 21),
+            ),
+            const SizedBox(width: AppDimensions.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    objetivo.asignatura.nombre,
+                    style: AppTypography.bodyBold,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(_detalle, style: AppTypography.caption),
+                ],
+              ),
+            ),
+            const SizedBox(width: AppDimensions.sm),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(_valor, style: AppTypography.h3.copyWith(color: color)),
+                Text(
+                  _estado,
+                  style: AppTypography.caption.copyWith(color: color),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color get _color {
+    if (objetivo.completado) {
+      return objetivo.aprobado ? AppColors.aprobado : AppColors.reprobado;
+    }
+    if (objetivo.imposible) return AppColors.reprobado;
+    final necesaria = objetivo.notaNecesaria;
+    if (necesaria == null || necesaria <= 4.0) return AppColors.aprobado;
+    if (necesaria <= 5.5) return AppColors.examen;
+    return AppColors.reprobado;
+  }
+
+  IconData get _icono {
+    if (objetivo.completado) {
+      return objetivo.aprobado
+          ? Icons.check_circle_rounded
+          : Icons.cancel_rounded;
+    }
+    if (objetivo.imposible) return Icons.warning_rounded;
+    return Icons.flag_rounded;
+  }
+
+  String get _valor {
+    if (objetivo.completado) {
+      return objetivo.promedioActual == null
+          ? '—'
+          : CalculoService.formatearPromedioOficial(objetivo.promedioActual!);
+    }
+    if (objetivo.imposible) return '> 7.0';
+    if (objetivo.asegurado) return '✓';
+    return objetivo.notaNecesaria == null
+        ? '—'
+        : CalculoService.formatearPromedioOficial(objetivo.notaNecesaria!);
+  }
+
+  String get _estado {
+    if (objetivo.completado) {
+      return objetivo.aprobado ? 'Aprobado' : 'Reprobado';
+    }
+    if (objetivo.imposible) return 'En riesgo';
+    if (objetivo.asegurado) return 'Encaminado';
+    return 'Necesitas';
+  }
+
+  String get _detalle {
+    if (objetivo.completado) return 'Todas las evaluaciones están registradas';
+    final pendiente = objetivo.pesoPendiente.clamp(0, 100).toStringAsFixed(0);
+    if (objetivo.imposible) {
+      return 'La meta requiere revisar tus próximos escenarios';
+    }
+    if (objetivo.asegurado) {
+      return 'La aprobación está asegurada con el $pendiente% restante';
+    }
+    return 'Promedio requerido en el $pendiente% restante';
   }
 }
 

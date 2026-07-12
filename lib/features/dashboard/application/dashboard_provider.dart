@@ -18,12 +18,24 @@ DashboardData _buildDashboard(List<Asignatura> asignaturas) {
   // Promedio de cada ramo (final si existe, si no la presentación).
   final promedios = <double>[];
   final rendimientos = <RendimientoAsignatura>[];
+  final objetivos = <ObjetivoAsignatura>[];
 
   for (final a in asignaturas) {
     final r = CalculoService.calcularAsignatura(a);
     final prom = r.promedioFinal ?? r.promedioPresentacion;
     if (prom != null) promedios.add(prom);
     rendimientos.add(RendimientoAsignatura(nombre: a.nombre, promedio: prom));
+    objetivos.add(
+      ObjetivoAsignatura(
+        asignatura: a,
+        promedioActual: r.promedioPresentacion,
+        pesoPendiente: r.pesoPendiente,
+        notaNecesaria: CalculoService.notaNecesariaRestante(
+          objetivo: 4.0,
+          evaluaciones: a.evaluaciones,
+        ),
+      ),
+    );
   }
 
   final promedioGeneral = CalculoService.promedioSimple(promedios);
@@ -43,5 +55,6 @@ DashboardData _buildDashboard(List<Asignatura> asignaturas) {
     promedioGeneral: promedioGeneral,
     proximasEvaluaciones: proximas.take(4).toList(),
     rendimientos: rendimientos,
+    objetivos: objetivos,
   );
 }

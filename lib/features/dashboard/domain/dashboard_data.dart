@@ -51,12 +51,35 @@ class RendimientoAsignatura {
   bool get enRiesgo => promedioOficial != null && promedioOficial! < 4.0;
 }
 
+/// Proyección para aprobar un ramo con nota 4.0.
+class ObjetivoAsignatura {
+  const ObjetivoAsignatura({
+    required this.asignatura,
+    required this.promedioActual,
+    required this.pesoPendiente,
+    required this.notaNecesaria,
+  });
+
+  final Asignatura asignatura;
+  final double? promedioActual;
+  final double pesoPendiente;
+  final double? notaNecesaria;
+
+  bool get completado => pesoPendiente <= 0.1;
+  bool get aprobado =>
+      promedioActual != null &&
+      CalculoService.promedioOficial(promedioActual!) >= 4.0;
+  bool get imposible => notaNecesaria != null && notaNecesaria! > 7.0;
+  bool get asegurado => notaNecesaria != null && notaNecesaria! <= 1.0;
+}
+
 /// Datos agregados que consume la pantalla Dashboard.
 class DashboardData {
   const DashboardData({
     required this.promedioGeneral,
     required this.proximasEvaluaciones,
     required this.rendimientos,
+    required this.objetivos,
   });
 
   /// Promedio general del semestre (1.0–7.0), o `null` si no hay notas.
@@ -64,6 +87,7 @@ class DashboardData {
 
   final List<ProximaEvaluacion> proximasEvaluaciones;
   final List<RendimientoAsignatura> rendimientos;
+  final List<ObjetivoAsignatura> objetivos;
 
   /// Progreso del donut de promedio (0.0–1.0).
   double get progresoGeneral =>

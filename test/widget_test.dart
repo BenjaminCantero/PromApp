@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:promapp/app.dart';
@@ -20,5 +21,13 @@ void main() {
     await tester.tap(find.text('Resumen'));
     await tester.pumpAndSettle();
     expect(find.text('Mi Rendimiento'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('MODO OBJETIVO'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('MODO OBJETIVO'), findsOneWidget);
+    expect(find.text('META 4.0'), findsOneWidget);
   });
 }

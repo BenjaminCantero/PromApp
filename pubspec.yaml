@@ -61,10 +61,15 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "logo.jpeg"
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "logo.jpeg"
+  image_path: "logo2_app_icon.png"
+  adaptive_icon_background: "#242321"
+  adaptive_icon_foreground: "logo2_app_icon.png"
   remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "logo2_app_icon.png"
+    background_color: "#242321"
+    theme_color: "#242321"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
